@@ -906,7 +906,7 @@ void MITController::MPCLoopCallback() {
   }
 
   if (open_loop_publisher_ != nullptr) {
-    assert(MPC_PREDICTION_HORIZON == 20);  // fixed message size
+    assert(MPC_PREDICTION_HORIZON == 10);  // fixed message size
     static interfaces::msg::PositionSequence open_loop_positions;
     for (unsigned int ol_idx = 0; ol_idx < MPC_PREDICTION_HORIZON; ol_idx++) {
       open_loop_positions.valid[ol_idx] = true;

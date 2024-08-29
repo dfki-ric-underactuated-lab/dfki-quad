@@ -4,7 +4,7 @@
 #include <eigen3/Eigen/Dense>
 #include <vector>
 
-#define SIZE 21
+#define SIZE 11
 
 GaitSequencePlottingNode::GaitSequencePlottingNode(const std::string& nodeName) : Node(nodeName) {
   gait_sequence_subscription_ = this->create_subscription<interfaces::msg::GaitSequence>(

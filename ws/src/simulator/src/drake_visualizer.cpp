@@ -27,8 +27,8 @@
 #include "interfaces/msg/wbc_target.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#define GS_SIZE 21
-#define OPEN_LOOP_SIZE 20
+#define GS_SIZE 11
+#define OPEN_LOOP_SIZE 10
 
 using namespace std::chrono_literals;
 using namespace drake;
