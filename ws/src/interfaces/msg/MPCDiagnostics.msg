@@ -1,0 +1,11 @@
+std_msgs/Header header
+
+float64 solve_time
+
+float64 acados_solve_qp_time
+float64 acados_condensing_time
+float64 acados_interface_time
+float64 acados_total_time
+int64 acados_num_iter
+int64 acados_t_computed
+int64 acados_return

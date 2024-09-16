@@ -1,0 +1,53 @@
+state_estimation_node:
+  ros__parameters:
+    state_publish_rate: 0.001
+    kalman_update_rate: 0.01
+    state_lf_publish_rate: 0.5
+    laying_on_ground_detection_offset: [ -0.02, -0.02, 0.005, 0.005 ]
+
+    contact_detection:
+      use_measured_forces: true
+      force_threshold: [ 0.01,0.01,0.01,0.01 ]
+      update_threshold : false
+      threshold_update_rate: 0.05
+      threshold_offset: 6.5
+      max_threshold_offset: 6.5
+      threshold_filter_size: 60
+      max_threshold_filter_size: 40 # should be shorter than other filter size, to not include peak
+      energy_obs_kd: 10.
+      energy_obs_threshold: 4.
+      leg_in_motion_joint_velocity_threshold: 0.001
+      use_energy_obs_contact_detection: false
+      energy_obs_filter_size: 20
+      leg_swing_time: 0.2
+
+
+    kalman:
+      imu_measures_g: false
+      assume_planar_ground: false
+      adapt_covariances: false
+
+      gyroscope_std: [ 0.0001, 0.0001, 0.0001 ]
+      accelerometer_std: [ 0.1, 0.1, 0.1 ]
+      gyroscope_bias_std: 0.0001
+      accelerometer_bias_std: 0.0001
+      contact_std: 0.01
+      belly_contact_point_measurement_std: 0.001
+      foot_step_measurement_std: 0.01
+      foot_on_plane_std: 10.0
+      min_stance_percentage_for_contact: 0.1
+
+      prior:
+        gyroscope_bias: [ -0., 0., -0. ]
+        accelerometer_bias: [ -0., 0., 0. ]
+
+        base_orientation_std: 0.00001
+        base_velocity_std: 0.00001
+        base_position_std: 0.0000001
+        gyroscope_bias_std: 0.001
+        accelerometer_bias_std: 0.001
+
+
+
+
+

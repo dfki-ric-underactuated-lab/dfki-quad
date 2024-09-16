@@ -1,0 +1,9 @@
+float64      period
+float64[4]   duty_factor
+float64[4]   phase_offset
+bool[4]      contact
+float64[4]   phase
+uint8        gait_sequencer
+uint8        SIMPLE=0
+uint8        ADAPTIVE=1
+uint8        BIOINSPIRED=2

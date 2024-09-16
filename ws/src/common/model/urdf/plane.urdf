@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot name="plane" xmlns:drake="http://drake.mit.edu">
+    <!-- Colors -->
+    <material name="grey">
+        <color rgba="0.91 0.925 0.945 1"/>
+    </material>
+    <material name="pink">
+        <color rgba="0.890196078 0.239215686 0.580392157 0.5"/>
+    </material>
+
+    <!-- Plane -->
+    <link name="plane_base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+            <geometry>
+                <box size="200 200 0.1"/>
+            </geometry>
+            <material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+            <geometry>
+                <box size="200 200 0.1"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="10.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+        <inertial>
+            <mass value="0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+    </link>
+</robot>

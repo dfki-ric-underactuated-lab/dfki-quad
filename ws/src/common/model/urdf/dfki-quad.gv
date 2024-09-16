@@ -1,0 +1,56 @@
+digraph G {
+node [shape=box];
+"base_link" [label="base_link"];
+"bl_HAA_link" [label="bl_HAA_link"];
+"bl_HFE_link" [label="bl_HFE_link"];
+"bl_KFE_link" [label="bl_KFE_link"];
+"bl_contact" [label="bl_contact"];
+"br_HAA_link" [label="br_HAA_link"];
+"br_HFE_link" [label="br_HFE_link"];
+"br_KFE_link" [label="br_KFE_link"];
+"br_contact" [label="br_contact"];
+"fl_HAA_link" [label="fl_HAA_link"];
+"fl_HFE_link" [label="fl_HFE_link"];
+"fl_KFE_link" [label="fl_KFE_link"];
+"fl_contact" [label="fl_contact"];
+"fr_HAA_link" [label="fr_HAA_link"];
+"fr_HFE_link" [label="fr_HFE_link"];
+"fr_KFE_link" [label="fr_KFE_link"];
+"fr_contact" [label="fr_contact"];
+"link_imu" [label="link_imu"];
+node [shape=ellipse, color=blue, fontcolor=blue];
+"base_link" -> "bl_abad" [label="xyz: -0.181 0.064645 0 \nrpy: 0 -0 0"]
+"bl_abad" -> "bl_HAA_link"
+"bl_HAA_link" -> "bl_shoulder" [label="xyz: 0 0.0878 0 \nrpy: 0 -0 0"]
+"bl_shoulder" -> "bl_HFE_link"
+"bl_HFE_link" -> "bl_knee" [label="xyz: 0 0 -0.15 \nrpy: 0 -0 0"]
+"bl_knee" -> "bl_KFE_link"
+"bl_KFE_link" -> "bl_contact_frame" [label="xyz: 0 0 -0.16852 \nrpy: 0 -0 0"]
+"bl_contact_frame" -> "bl_contact"
+"base_link" -> "br_abad" [label="xyz: -0.181 -0.064645 0 \nrpy: 0 -0 0"]
+"br_abad" -> "br_HAA_link"
+"br_HAA_link" -> "br_shoulder" [label="xyz: 0 -0.0878 0 \nrpy: 0 -0 0"]
+"br_shoulder" -> "br_HFE_link"
+"br_HFE_link" -> "br_knee" [label="xyz: 0 0 -0.15 \nrpy: 0 -0 0"]
+"br_knee" -> "br_KFE_link"
+"br_KFE_link" -> "br_contact_frame" [label="xyz: 0 0 -0.16852 \nrpy: 0 -0 0"]
+"br_contact_frame" -> "br_contact"
+"base_link" -> "fl_abad" [label="xyz: 0.181 0.064645 0 \nrpy: 0 -0 0"]
+"fl_abad" -> "fl_HAA_link"
+"fl_HAA_link" -> "fl_shoulder" [label="xyz: 0 0.0878 0 \nrpy: 0 -0 0"]
+"fl_shoulder" -> "fl_HFE_link"
+"fl_HFE_link" -> "fl_knee" [label="xyz: 0 0 -0.15 \nrpy: 0 -0 0"]
+"fl_knee" -> "fl_KFE_link"
+"fl_KFE_link" -> "fl_contact_frame" [label="xyz: 0 0 -0.16852 \nrpy: 0 -0 0"]
+"fl_contact_frame" -> "fl_contact"
+"base_link" -> "fr_abad" [label="xyz: 0.181 -0.064645 0 \nrpy: 0 -0 0"]
+"fr_abad" -> "fr_HAA_link"
+"fr_HAA_link" -> "fr_shoulder" [label="xyz: 0 -0.0878 0 \nrpy: 0 -0 0"]
+"fr_shoulder" -> "fr_HFE_link"
+"fr_HFE_link" -> "fr_knee" [label="xyz: 0 0 -0.15 \nrpy: 0 -0 0"]
+"fr_knee" -> "fr_KFE_link"
+"fr_KFE_link" -> "fr_contact_frame" [label="xyz: 0 0 -0.16852 \nrpy: 0 -0 0"]
+"fr_contact_frame" -> "fr_contact"
+"base_link" -> "joint_imu" [label="xyz: -0.0005 -0.098729 0 \nrpy: 0 -0 0"]
+"joint_imu" -> "link_imu"
+}

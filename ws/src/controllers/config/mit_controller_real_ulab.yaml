@@ -1,0 +1,71 @@
+mit_controller_node: ##### REAL SYSTEM
+  ros__parameters:
+    initial_height: 0.22
+    leg_control_mode: 3 # 0: wbc; 3: ikin
+    joint_control_gains: # wbc
+      swing_Kp: [ 2.0, 1.5, 1.75 ]
+      swing_Kd: [ 0.9, 0.5, 0.5 ]
+      stance_Kp: [ 1.5, 1.2, 1.2 ]
+      stance_Kd: [ 1.95, 0.75, 0.75 ]
+    cartesian_joint_control_gains:
+      swing_Kp: [ 4., 3., 2.5 ]
+      swing_Kd: [ 1.8, 1.0, 1.0 ]
+      stance_Kp: [ .0, .0, .0 ]
+      stance_Kd: [ 3.5, 1.5, 1.5 ]
+    cartesian_stiffness_control_gains:
+      swing_Kp: [ 500.0, 500.0, 1000.0 ]
+      swing_Kd: [ 300.0, 300.0, 500.0 ]
+      stance_Kp: [ 50.0, 50.0, 1000.0 ]
+      stance_Kd: [ 30.0, 30.0, 30.0 ]
+    slc_swing_height: 0.05
+    mpc_alpha: 0.0000000001
+    #################### roll, pitch, yaw, x   , y   ,    z, rolld,pitchd,yawd, xd, yd , zd
+    mpc_state_weights_stand: [ 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+    # mpc_state_weights_move: [ 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+    mpc_state_weights_move: [ 20.0, 200.0, 50.0, 0.0, 0.0, 100.0, 0.2, 0.2, 0.8, 20.0, 20.0, 0.3 ]
+    mpc_mu: 0.45
+    mpc_fmin: 4.0
+    mpc_fmax: 400.0
+    gs_shoulder_positions: [
+      0.175, 0.15, 0.0,
+      0.175, -0.15, 0.0,
+      -0.19, 0.15, 0.0,
+      -0.19, -0.15, 0.0
+    ]
+    raibert:
+      k: 0.05
+      filtersize: 20
+      z_on_plane: false
+    early_contact_detection: false
+    late_contact_detection: false
+    late_contact_reschedule_swing_phase: true
+    lost_contact_detection: false
+    fix_standing_position: true
+    maximum_swing_leg_progress_to_update_target: 0.5
+    wbc:
+      inverse_dynamics:
+        foot_position_based_on_target_height: false
+        foot_position_based_on_target_orientation: false
+        transformation_filter_size: 20
+      arc_opt:
+        model_urdf: "src/common/model/urdf/quad.urdf"
+        feet_names: [ "fl_contact", "fr_contact","bl_contact", "br_contact" ]
+        joint_names: [ "fl_abad", "fl_shoulder", "fl_knee", "fr_abad", "fr_shoulder", "fr_knee", "bl_abad", "bl_shoulder", "bl_knee", "br_abad", "br_shoulder", "br_knee" ]
+        mu: 0.45
+        ################## x,y,z, roll, pitch, yaw
+        com_pose_weight: [ 10000.,10000.,10000.,10000.,10000.,10000. ]
+        com_pose_Kp: [ 300.,300.,300.,200.,200.,200. ]
+        com_pose_Kd: [ 100.,100.,100.,100.,100.,100. ]
+        ################## fx, fy, fz
+        foot_force_weight: [ 30000.,30000.,30000. ]
+        ################## x,y,z
+        foot_pose_weight: [ 10000.0,10000.0,10000.0 ]
+        feet_pose_Kp: [ 1500.,1500.,1500. ]
+        feet_pose_Kd: [ 100.,100.,100. ]
+joy_to_target:
+  ros__parameters:
+    init_robot_height: 0.22
+    max_robot_height: 0.30
+    max_acceleration: 0.5
+
+

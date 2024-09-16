@@ -1,0 +1,4 @@
+contact_sensor_driver:
+  ros__parameters:
+    serial_port_name: "/dev/ttyACM0"
+    serial_read_time_out_ms: 100

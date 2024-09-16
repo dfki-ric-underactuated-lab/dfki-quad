@@ -1,0 +1,4 @@
+int8 target_mode
+---
+int8 mode_in
+bool success

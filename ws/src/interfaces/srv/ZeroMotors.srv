@@ -1,0 +1,4 @@
+uint8[<=12] motor_ids
+---
+bool success
+sensor_msgs/JointState states

@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  xmlns:drake="http://drake.mit.edu"
+  name="dfki-quad">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-2.2638E-05 0.00021935 0.0008237"
+        rpy="0 0 0" />
+      <mass
+        value="4.5426" />
+      <inertia
+        ixx="0.0076268"
+        ixy="6.0675E-07"
+        ixz="-5.8131E-05"
+        iyy="0.0074986"
+        iyz="-1.2127E-09"
+        izz="0.010518" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/base_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision name="base_link_collision">
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+          <box size="0.47 0.18 0.12" name="TEST"/>
+          <!--mesh filename="meshes/obj/base_link.obj" /-->
+      </geometry>
+      <drake:proximity_properties>
+        <drake:compliant_hydroelastic/>
+        <drake:hydroelastic_modulus value="5e7"/>
+        <drake:hunt_crossley_dissipation value="0.0"/>
+        <drake:mesh_resolution_hint value="0.1"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <link
+    name="link_imu">
+    <inertial>
+      <origin
+        xyz="0.00046907 0.013002 -0.0021778"
+        rpy="0 0 0" />
+      <mass
+        value="0.039074" />
+      <inertia
+        ixx="1.9822E-05"
+        ixy="-8.444E-07"
+        ixz="4.5273E-07"
+        iyy="1.2294E-05"
+        iyz="-9.5672E-07"
+        izz="3.0026E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/link_imu.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <!--collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/link_imu.obj" />
+      </geometry>
+    </collision-->
+  </link>
+  <joint
+    name="joint_imu"
+    type="fixed">
+    <origin
+      xyz="-0.0005 -0.098729 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_imu" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+
+
+
+
+
+
+  <link
+    name="fl_HAA_link">
+    <inertial>
+      <origin
+        xyz="-0.00468975539369312 -0.00428992245344755 3.71022548769729E-11"
+        rpy="0 0 0" />
+      <mass
+        value="0.595958341886362" />
+      <inertia
+        ixx="0.000404243397536089"
+        ixy="1.14966094557709E-06"
+        ixz="7.31545153465743E-18"
+        iyy="0.000680157569347147"
+        iyz="6.17856098177554E-14"
+        izz="0.000416108103085786" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fl_HAA_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <!--collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fl_HAA_link.obj" />
+      </geometry>
+    </collision-->
+  </link>
+  <joint
+    name="fl_abad"
+    type="revolute">
+    <origin
+      xyz="0.181 0.064645 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="fl_HAA_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit lower="-1.5708" upper="1.5708" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="fl_HFE_link">
+    <inertial>
+      <origin
+        xyz="-0.000473484460610213 -0.0313838995140919 -0.0139105757410481"
+        rpy="0 0 0" />
+      <mass
+        value="0.839506618858938" />
+      <inertia
+        ixx="0.000957798668104474"
+        ixy="-2.97990154477032E-11"
+        ixz="-4.16617902958463E-06"
+        iyy="0.00131919990491172"
+        iyz="-1.14960846692485E-06"
+        izz="0.000501025769916749" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fl_HFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision name="fl_HFE_collision">
+      <origin
+        xyz="0 0 -0.05"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/fl_HFE_link.obj" /-->
+          <box size="0.065 0.035 0.19"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.19"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="fl_shoulder"
+    type="revolute">
+    <origin
+      xyz="0 0.0878 0"
+      rpy="0 0 0" />
+    <parent
+      link="fl_HAA_link" />
+    <child
+      link="fl_HFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-4.398" upper="4.398" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="fl_KFE_link">
+    <inertial>
+      <origin
+        xyz="0.00499709183309199 -3.10682654602878E-09 -0.0402416877508378"
+        rpy="0 0 0" />
+      <mass
+        value="0.12757490021694" />
+      <inertia
+        ixx="0.000172039837493548"
+        ixy="1.12182134513165E-10"
+        ixz="2.02054840363873E-05"
+        iyy="0.000196849936261391"
+        iyz="-1.07919183413223E-10"
+        izz="2.70201230114763E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fl_KFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.498039215686275 0.498039215686275 0.498039215686275 1" />
+      </material>
+    </visual>
+    <collision name="fl_KFE_collision">
+      <origin
+        xyz="0 0 -0.06"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/fl_KFE_link.obj" /-->
+        <box size="0.02 0.02 0.15"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.02"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="fl_knee"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.15"
+      rpy="0 0 0" />
+    <parent
+      link="fl_HFE_link" />
+    <child
+      link="fl_KFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-2.5" upper="1.57" effort="30" velocity="20"/>
+  </joint>
+  <link
+    name="fl_contact">
+    <inertial>
+      <origin
+        xyz="-2.51603576520432E-06 -2.91988655476416E-14 -5.07156030066236E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.00342797071343661" />
+      <inertia
+        ixx="9.02337098630887E-07"
+        ixy="-3.19251506322727E-24"
+        ixz="8.52964581073493E-09"
+        iyy="8.98105482938466E-07"
+        iyz="-6.43513606009541E-24"
+        izz="9.15298645773856E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fl_foot_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.298039215686275 0.298039215686275 0.298039215686275 1" />
+      </material>
+    </visual>
+    <collision name="fl_foot_collision">
+      <geometry>
+          <!-- <mesh filename="meshes/obj/fl_foot_link.obj" /> -->
+          <sphere radius="0.02"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:mesh_resolution_hint value="0.02"/>
+          <drake:hydroelastic_modulus value="3e5"/>
+          <drake:hunt_crossley_dissipation value="50.0"/>
+          <drake:mu_dynamic value="4.0"/>
+          <drake:mu_static value="4.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="fl_contact_frame"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.16852"
+      rpy="0 0 0" />
+    <parent
+      link="fl_KFE_link" />
+    <child
+      link="fl_contact" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+
+  <transmission name="trans_fl_abad">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_abad">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_abad">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fl_shoulder">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_shoulder">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_shoulder">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fl_knee">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_knee">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_knee">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+
+
+
+
+
+
+
+  <link
+    name="fr_HAA_link">
+    <inertial>
+      <origin
+        xyz="-0.0046898 0.0042899 -3.7102E-11"
+        rpy="0 0 0" />
+      <mass
+        value="0.59596" />
+      <inertia
+        ixx="0.00040424"
+        ixy="-1.1497E-06"
+        ixz="-7.3567E-18"
+        iyy="0.00068016"
+        iyz="6.1785E-14"
+        izz="0.00041611" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fr_HAA_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.69804 0.69804 0.69804 1" />
+      </material>
+    </visual>
+    <!--collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fr_HAA_link.obj" />
+      </geometry>
+    </collision-->
+  </link>
+  <joint
+    name="fr_abad"
+    type="revolute">
+    <origin
+      xyz="0.181 -0.064645 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="fr_HAA_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit lower="-1.5708" upper="1.5708" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="fr_HFE_link">
+    <inertial>
+      <origin
+        xyz="-0.00047348446049858 0.0313838997390697 -0.0139105757410396"
+        rpy="0 0 0" />
+      <mass
+        value="0.839506618858938" />
+      <inertia
+        ixx="0.000957798668104618"
+        ixy="-2.97990159567322E-11"
+        ixz="-4.16617903053494E-06"
+        iyy="0.00131919990491191"
+        iyz="1.14971373316672E-06"
+        izz="0.000501025769916795" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fr_HFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision name="fr_HFE_collision">
+      <origin
+        xyz="0 0 -0.05"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/fr_HFE_link.obj" /-->
+        <box size="0.065 0.035 0.19"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.19"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="fr_shoulder"
+    type="revolute">
+    <origin
+      xyz="0 -0.0878 0"
+      rpy="0 0 0" />
+    <parent
+      link="fr_HAA_link" />
+    <child
+      link="fr_HFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-4.398" upper="4.398" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="fr_KFE_link">
+    <inertial>
+      <origin
+        xyz="0.0049971 -7.8205E-10 -0.040242"
+        rpy="0 0 0" />
+      <mass
+        value="0.12757" />
+      <inertia
+        ixx="0.00017204"
+        ixy="1.1239E-10"
+        ixz="2.0206E-05"
+        iyy="0.00019685"
+        iyz="-1.0696E-10"
+        izz="2.702E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/fr_KFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.49804 0.49804 0.49804 1" />
+      </material>
+    </visual>
+    <collision name="fr_KFE_collision">
+      <origin
+        xyz="0 0 -0.06"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/fr_KFE_link.obj" /-->
+        <box size="0.02 0.02 0.15"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.02"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="fr_knee"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.15"
+      rpy="0 0 0" />
+    <parent
+      link="fr_HFE_link" />
+    <child
+      link="fr_KFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-2.5" upper="1.57" effort="30" velocity="20"/>
+  </joint>
+  <link name="fr_contact">
+      <inertial>
+      <origin
+        xyz="-2.51603577716697E-06 5.82867087928207E-15 -5.07156029194711E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.00342797071343659" />
+      <inertia
+        ixx="9.02337098630886E-07"
+        ixy="-6.14269393393905E-23"
+        ixz="8.5296458107349E-09"
+        iyy="8.98105482938464E-07"
+        iyz="-1.23817963134252E-22"
+        izz="9.15298645773855E-07" />
+    </inertial>
+      <visual>
+          <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
+          <geometry>
+            <mesh
+              filename="meshes/obj/fr_foot_link.obj" />
+          </geometry>
+          <material name="">
+              <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1"/>
+          </material>
+      </visual>
+      <collision name="fr_foot_collision">
+          <!--origin xyz="0 0 0" rpy="0 0 0"/-->
+          <geometry>
+              <!-- <mesh filename="meshes/obj/fr_foot_link.obj" /> -->
+              <sphere radius="0.02"/>
+          </geometry>
+          <drake:proximity_properties>
+              <drake:compliant_hydroelastic/>
+              <drake:mesh_resolution_hint value="0.02"/>
+              <drake:hydroelastic_modulus value="3e5"/>
+              <drake:hunt_crossley_dissipation value="50.0"/>
+              <drake:mu_dynamic value="4.0"/>
+              <drake:mu_static value="4.0"/>
+          </drake:proximity_properties>
+      </collision>
+  </link>
+  <joint name="fr_contact_frame" type="fixed">
+      <origin
+      xyz="0 0 -0.16852"
+      rpy="0 0 0" />
+      <parent link="fr_KFE_link"/>
+      <child link="fr_contact"/>
+      <axis xyz="0 0 0"/>
+  </joint>
+
+
+
+
+  <transmission name="trans_fr_abad">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="fr_abad">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_fr_abad">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_fr_shoulder">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="fr_shoulder">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_fr_shoulder">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_fr_knee">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="fr_knee">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_fr_knee">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+
+
+
+
+
+
+
+
+  <link
+    name="bl_HAA_link">
+    <inertial>
+      <origin
+        xyz="0.00468975539369695 -0.00428992245344534 -3.7101791728375E-11"
+        rpy="0 0 0" />
+      <mass
+        value="0.595958341886362" />
+      <inertia
+        ixx="0.00040424339753609"
+        ixy="-1.14966094557807E-06"
+        ixz="7.36433083991742E-18"
+        iyy="0.000680157569347147"
+        iyz="-6.17836969517763E-14"
+        izz="0.000416108103085786" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/bl_HAA_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <!--collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/bl_HAA_link.obj" />
+      </geometry>
+    </collision-->
+  </link>
+  <joint
+    name="bl_abad"
+    type="revolute">
+    <origin
+      xyz="-0.181 0.064645 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="bl_HAA_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit lower="-1.5708" upper="1.5708" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="bl_HFE_link">
+    <inertial>
+      <origin
+        xyz="-0.000473484185818884 -0.0313839000000203 -0.0139105755292957"
+        rpy="0 0 0" />
+      <mass
+        value="0.839506618858937" />
+      <inertia
+        ixx="0.000957798668104332"
+        ixy="-2.9799014754116E-11"
+        ixz="-4.16617902958476E-06"
+        iyy="0.00131919990491143"
+        iyz="-1.14960846694496E-06"
+        izz="0.000501025769916601" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/bl_HFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision name="bl_HFE_collision">
+      <origin
+        xyz="0 0 -0.05"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/bl_HFE_link.obj" /-->
+        <box size="0.065 0.035 0.19"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.06"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="bl_shoulder"
+    type="revolute">
+    <origin
+      xyz="0 0.0878 0"
+      rpy="0 0 0" />
+    <parent
+      link="bl_HAA_link" />
+    <child
+      link="bl_HFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-4.398" upper="4.398" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="bl_KFE_link">
+    <inertial>
+      <origin
+        xyz="0.0049971 -3.1062E-09 -0.040242"
+        rpy="0 0 0" />
+      <mass
+        value="0.12757" />
+      <inertia
+        ixx="0.00017204"
+        ixy="1.1218E-10"
+        ixz="2.0205E-05"
+        iyy="0.00019685"
+        iyz="-1.0792E-10"
+        izz="2.702E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/bl_KFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.498039215686275 0.498039215686275 0.498039215686275 1" />
+      </material>
+    </visual>
+    <collision name="bl_KFE_collision">
+      <origin
+        xyz="0 0 -0.06"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/bl_KFE_link.obj" /-->
+        <box size="0.02 0.02 0.15"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.02"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="bl_knee"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.15"
+      rpy="0 0 0" />
+    <parent
+      link="bl_HFE_link" />
+    <child
+      link="bl_KFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-2.5" upper="1.57" effort="30" velocity="20"/>
+  </joint>
+  <link name="bl_contact">
+      <inertial>
+      <origin
+        xyz="-2.51603578835247E-06 7.21644966006352E-16 -5.07156029333489E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.00342797071343662" />
+      <inertia
+        ixx="9.02337098630887E-07"
+        ixy="-2.41102263399068E-23"
+        ixz="8.529645810735E-09"
+        iyy="8.98105482938466E-07"
+        iyz="-4.85988582243857E-23"
+        izz="9.15298645773856E-07" />
+    </inertial>
+      <visual>
+          <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
+          <geometry>
+              <sphere radius="0.02"/>
+          </geometry>
+          <material name="">
+              <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1"/>
+          </material>
+      </visual>
+      <collision name="bl_foot_collision">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+              <!-- <mesh filename="meshes/obj/bl_foot_link.obj" /> -->
+              <sphere radius="0.02"/>
+          </geometry>
+          <drake:proximity_properties>
+              <drake:compliant_hydroelastic/>
+              <drake:mesh_resolution_hint value="0.02"/>
+              <drake:hydroelastic_modulus value="3e5"/>
+              <drake:hunt_crossley_dissipation value="50.0"/>
+              <drake:mu_dynamic value="4.0"/>
+              <drake:mu_static value="4.0"/>
+          </drake:proximity_properties>
+      </collision>
+  </link>
+  <joint name="bl_contact_frame" type="fixed">
+      <origin
+      xyz="0 0 -0.16852"
+      rpy="0 0 0" />
+      <parent link="bl_KFE_link"/>
+      <child link="bl_contact"/>
+      <axis xyz="0 0 0"/>
+  </joint>
+
+
+  <transmission name="trans_bl_abad">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="bl_abad">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_bl_abad">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_bl_shoulder">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="bl_shoulder">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_bl_shoulder">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_bl_knee">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="bl_knee">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_bl_knee">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+
+
+
+
+
+
+
+
+
+  <link
+    name="br_HAA_link">
+    <inertial>
+      <origin
+        xyz="0.00468975539369729 0.00428992245344684 3.710234327491E-11"
+        rpy="0 0 0" />
+      <mass
+        value="0.595958341886362" />
+      <inertia
+        ixx="0.000404243397536089"
+        ixy="1.14966094557612E-06"
+        ixz="-7.33243445998478E-18"
+        iyy="0.000680157569347147"
+        iyz="-6.17855788638101E-14"
+        izz="0.000416108103085786" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/br_HAA_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <!--collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/br_HAA_link.obj" />
+      </geometry>
+    </collision-->
+  </link>
+  <joint
+    name="br_abad"
+    type="revolute">
+    <origin
+      xyz="-0.181 -0.064645 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="br_HAA_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit lower="-1.5708" upper="1.5708" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="br_HFE_link">
+    <inertial>
+      <origin
+        xyz="-0.00047348 0.031384 -0.013911"
+        rpy="0 0 0" />
+      <mass
+        value="0.83951" />
+      <inertia
+        ixx="0.0009578"
+        ixy="-2.9799E-11"
+        ixz="-4.1662E-06"
+        iyy="0.0013192"
+        iyz="1.1497E-06"
+        izz="0.00050103" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/br_HFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+    <collision name="br_HFE_collision">
+      <origin
+        xyz="0 0 -0.05"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/br_HFE_link.obj" /-->
+        <box size="0.065 0.035 0.19"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.06"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="br_shoulder"
+    type="revolute">
+    <origin
+      xyz="0 -0.0878 0"
+      rpy="0 0 0" />
+    <parent
+      link="br_HAA_link" />
+    <child
+      link="br_HFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-4.398" upper="4.398" effort="16" velocity="43.63"/>
+  </joint>
+  <link
+    name="br_KFE_link">
+    <inertial>
+      <origin
+        xyz="0.00499709356132583 -2.66456207098642E-09 -0.0402416890875368"
+        rpy="0 0 0" />
+      <mass
+        value="0.127574893940829" />
+      <inertia
+        ixx="0.000172039817056522"
+        ixy="1.12182134994849E-10"
+        ixz="2.02054667645553E-05"
+        iyy="0.000196849901185872"
+        iyz="-1.07919183722331E-10"
+        izz="2.70201083704732E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/obj/br_KFE_link.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision name="br_KFE_collision">
+      <origin
+        xyz="0 0 -0.06"
+        rpy="0 0 0" />
+      <geometry>
+        <!--mesh
+          filename="meshes/obj/br_KFE_link.obj" /-->
+        <box size="0.02 0.02 0.15"/>
+      </geometry>
+      <drake:proximity_properties>
+          <drake:compliant_hydroelastic/>
+          <drake:hydroelastic_modulus value="5e7"/>
+          <drake:mesh_resolution_hint value="0.02"/>
+          <drake:hunt_crossley_dissipation value="0.0"/>
+      </drake:proximity_properties>
+    </collision>
+  </link>
+  <joint
+    name="br_knee"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.15"
+      rpy="0 0 0" />
+    <parent
+      link="br_HFE_link" />
+    <child
+      link="br_KFE_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit lower="-2.5" upper="1.57" effort="30" velocity="20"/>
+  </joint>
+  <link name="br_contact">
+      <inertial>
+      <origin
+        xyz="-2.51603578785287E-06 -1.66533453693773E-16 -5.07156029344591E-06"
+        rpy="0 0 0" />
+      <mass
+        value="0.00342797071343662" />
+      <inertia
+        ixx="9.02337098630887E-07"
+        ixy="-1.89468240129567E-23"
+        ixz="8.52964581073498E-09"
+        iyy="8.98105482938465E-07"
+        iyz="-3.81910149256456E-23"
+        izz="9.15298645773856E-07" />
+    </inertial>
+      <visual>
+          <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
+          <geometry>
+              <sphere radius="0.02"/>
+          </geometry>
+          <material name="">
+              <color rgba="0.647058823529412 0.619607843137255 0.588235294117647 1"/>
+          </material>
+      </visual>
+      <collision name="br_foot_collision">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+              <!-- <mesh filename="meshes/obj/br_foot_link.obj" /> -->
+              <sphere radius="0.02"/>
+          </geometry>
+          <drake:proximity_properties>
+              <drake:compliant_hydroelastic/>
+              <drake:mesh_resolution_hint value="0.02"/>
+              <drake:hydroelastic_modulus value="3e5"/>
+              <drake:hunt_crossley_dissipation value="50.0"/>
+              <drake:mu_dynamic value="4.0"/>
+              <drake:mu_static value="4.0"/>
+          </drake:proximity_properties>
+      </collision>
+  </link>
+  <joint name="br_contact_frame" type="fixed">
+      <origin
+      xyz="0 0 -0.16852"
+      rpy="0 0 0" />
+      <parent link="br_KFE_link"/>
+      <child link="br_contact"/>
+      <axis xyz="0 0 0"/>
+  </joint>
+
+
+
+  <transmission name="trans_br_abad">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="br_abad">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_br_abad">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_br_shoulder">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="br_shoulder">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_br_shoulder">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+  <transmission name="trans_br_knee">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="br_knee">
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="act_br_knee">
+          <mechanicalReduction>1.0</mechanicalReduction>
+          <hardwareInterface>PositionJointInterface</hardwareInterface>
+          <drake:rotor_inertia value="0.05"/>
+      </actuator>
+  </transmission>
+
+
+
+</robot>

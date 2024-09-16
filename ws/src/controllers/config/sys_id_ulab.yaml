@@ -1,0 +1,11 @@
+sysid_leg_controller_node:
+  ros__parameters:
+    leg_no: 0             #0: fl, 1:fr, 2:bl, 3:br
+    max_segments: 200.0   #how often a new EE position is sampled
+    max_segment_time: 2.0 #max time to get to next EE position
+    min_segment_time: 0.1 #min time to get to next EE position
+    num_velocities: 10.0  #how often segment time is decreased during experiment
+    ellipsoid_position: [ 0.167, 0.1738, -0.25, 0.167, -0.1738, -0.25, -0.197, 0.1738, -0.25,-0.197, -0.1738, -0.25] #ellipsoid center for each leg
+    ellipsoid_params: [ 0.2, 0.1, 0.1 ]
+    kp: 100.0             #motor P-Gain
+    kd: 5.0               #motor D-Gain

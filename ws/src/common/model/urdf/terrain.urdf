@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<robot name="plane" xmlns:drake="http://drake.mit.edu">
+    <!-- Colors -->
+    <material name="grey">
+        <color rgba="0.91 0.925 0.945 1"/>
+    </material>
+    <material name="pink">
+        <color rgba="0.890196078 0.239215686 0.580392157 1."/>
+    </material>
+
+    <!-- Plane -->
+    <link name="plane_base_link">
+        <!-- plane -->
+        <!-- <visual>
+            <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+            <geometry>
+                <box size="200 200 0.1"/>
+            </geometry>
+            <material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="0 0 0" xyz="0 0 -0.05"/>
+            <geometry>
+                <box size="200 200 0.1"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="10.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision> -->
+        <!-- stairs 1 -->
+        <visual>
+            <origin rpy="1.570796327 0 0" xyz="0 0 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="0.5 0.5 0.5"/>
+            </geometry><material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="1.570796327 0 0" xyz="0 0 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="0.5 0.5 0.5"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="1.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+        <!-- stairs 2 -->
+        <visual>
+            <origin rpy="1.570796327 0 0" xyz="0 3 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="1 1 1"/>
+            </geometry><material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="1.570796327 0 0" xyz="0 3 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="1 1 1"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="1.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+        <!-- stairs 3 -->
+        <visual>
+            <origin rpy="1.570796327 0 0" xyz="0 -1.5 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="0.25 0.25 0.25"/>
+            </geometry><material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="1.570796327 0 0" xyz="0 -1.5 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/stairs.obj" scale="0.25 0.25 0.25"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="1.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+        <!-- ramps -->
+        <visual>
+            <origin rpy="1.570796327 0 0" xyz="0 -4 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/ramps.obj" scale="1 1 1"/>
+            </geometry><material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="1.570796327 0 0" xyz="0 -4 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/ramps.obj" scale="1 1 1"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="1.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+        <!-- terrain -->
+        <visual>
+            <origin rpy="0 0 0" xyz="0 -4 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/terrain.obj" scale="1 1 1"/>
+            </geometry><material name="pink"/>
+        </visual>
+        <collision name="plane_collision">
+            <origin rpy="0 0 0" xyz="0 -4 -0.0"/>
+            <geometry>
+                <!-- <box size="20 20 0.1"/> -->
+                <mesh filename="meshes/obj/terrain.obj" scale="1 1 1"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:rigid_hydroelastic/>
+                <drake:mesh_resolution_hint value="1.0"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_static value="1.0"/>
+                <drake:mu_dynamic value="1.0"/>
+            </drake:proximity_properties>
+        </collision>
+
+        <inertial>
+            <mass value="0"/>
+            <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+        </inertial>
+    </link>
+</robot>

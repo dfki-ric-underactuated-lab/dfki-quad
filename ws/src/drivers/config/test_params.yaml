@@ -1,0 +1,86 @@
+test_abstract_motor_driver:
+  ros__parameters:
+    cmd_send_frequency: 1.0
+    state_pub_frequency: 1.0
+    watchdog_limit: 25
+    imu_mounting_deg:
+      roll: 90.0
+      pitch: 0.0
+      yaw: 0.0
+    attitude_rate_hz: 1000000.0
+    motor_names: [fl_abad, fl_shoulder, fl_knee,
+                  fr_abad, fr_shoulder, fr_knee,
+                  bl_abad, bl_shoulder, bl_knee,
+                  br_abad, br_shoulder, br_knee]
+    fr_abad:
+      bus_id: 0
+      motor_id: 1
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    fr_hip:
+      bus_id: 0
+      motor_id: 2
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    fr_knee:
+      bus_id: 0
+      motor_id: 3
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    fl_abad:
+      bus_id: 1
+      motor_id: 4
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    fl_hip:
+      bus_id: 1
+      motor_id: 5
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    fl_knee:
+      bus_id: 1
+      motor_id: 6
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rr_abad:
+      bus_id: 2
+      motor_id: 7
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rr_hip:
+      bus_id: 2
+      motor_id: 8
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rr_knee:
+      bus_id: 2
+      motor_id: 9
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rl_abad:
+      bus_id: 3
+      motor_id: 10
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rl_hip:
+      bus_id: 3
+      motor_id: 11
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1
+    rl_knee:
+      bus_id: 3
+      motor_id: 11
+      fixed_gains: false
+      Kp: 0.1
+      Kd: 0.1

@@ -1,0 +1,12 @@
+leg_driver:
+  ros__parameters:
+    update_freq: 500.0
+    max_msg_repeat: 200 # max amount cycles without new msg until going into damping mode
+    kd_damping: 3.0 # kd value in damping mode
+    torque_limit: 20.0 # limit to clip desired torques in torque_control_mode
+    control_mode: 2 # 0: joint control; 1: joint torque control; 2: cartesian stiffness control; 3 cartesian joint control
+    default_keep_joint_positions: [ 0.126, 0.61, -1.22, -0.126, 0.61, -1.22, 0.126, 0.61, -1.22, -0.126, 0.61, -1.226 ]
+    keep_joint_pose_Kp: 5.0
+    keep_joint_pose_Kd: 1.0
+
+

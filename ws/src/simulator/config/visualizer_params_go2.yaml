@@ -1,0 +1,5 @@
+drake_visualizer:
+  ros__parameters:
+    topic: 3  # 0: joint_states; 1: joint_cmd; 2: leg_joint_cmd; 3: quad_state
+    model_urdf: "src/common/model/urdf/go2/urdf/go2_description.urdf"
+    foot_names: [ "fl_contact", "fr_contact", "bl_contact", "br_contact" ]

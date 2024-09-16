@@ -1,0 +1,1537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by
+Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
+<robot name="go2_description">
+    <link
+            name="base_link">
+        <inertial>
+            <origin
+                    xyz="0.021112 0 -0.005366"
+                    rpy="0 0 0"/>
+            <mass
+                    value="6.921"/>
+            <inertia
+                    ixx="0.02448"
+                    ixy="0.00012166"
+                    ixz="0.0014849"
+                    iyy="0.098077"
+                    iyz="-3.12E-05"
+                    izz="0.107"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/base.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="base_link_collision">
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.3762 0.0935 0.114"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+                <drake:mesh_resolution_hint value="0.1"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <link
+            name="Head_upper">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.001"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <collision>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.05" length="0.09"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="Head_upper_joint"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0.285 0 0.01"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="Head_upper"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="Head_lower">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.001"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <collision>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <sphere radius="0.047"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="Head_lower_joint"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0.008 0 -0.07"
+                rpy="0 0 0"/>
+        <parent
+                link="Head_upper"/>
+        <child
+                link="Head_lower"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="front_left_HAA_link">
+        <inertial>
+            <origin
+                    xyz="-0.0054 0.00194 -0.000105"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.678"/>
+            <inertia
+                    ixx="0.00048"
+                    ixy="-3.01E-06"
+                    ixz="1.11E-06"
+                    iyy="0.000884"
+                    iyz="-1.42E-06"
+                    izz="0.000596"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/hip.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0"/>
+            <geometry>
+                <cylinder length="0.04" radius="0.046"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fl_abad"
+            type="revolute">
+        <origin
+                xyz="0.1934 0.0465 0"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="front_left_HAA_link"/>
+        <axis
+                xyz="1 0 0"/>
+        <limit
+                lower="-1.0472"
+                upper="1.0472"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="front_left_HFE_link">
+        <inertial>
+            <origin
+                    xyz="-0.00374 -0.0223 -0.0327"
+                    rpy="0 0 0"/>
+            <mass
+                    value="1.152"/>
+            <inertia
+                    ixx="0.00584"
+                    ixy="8.72E-05"
+                    ixz="-0.000289"
+                    iyy="0.0058"
+                    iyz="0.000808"
+                    izz="0.00103"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/thigh.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_left_HFE_collision">
+            <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065"/>
+            <geometry>
+                <box size="0.213 0.0245 0.034"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.19"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fl_shoulder"
+            type="revolute">
+        <origin
+                xyz="0 0.0955 0"
+                rpy="0 0 0"/>
+        <parent
+                link="front_left_HAA_link"/>
+        <child
+                link="front_left_HFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-1.5708"
+                upper="3.4907"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="front_left_KFE_link">
+        <inertial>
+            <origin
+                    xyz="0.00548 -0.000975 -0.115"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.154"/>
+            <inertia
+                    ixx="0.00108"
+                    ixy="3.4E-07"
+                    ixz="1.72E-05"
+                    iyy="0.0011"
+                    iyz="8.28E-06"
+                    izz="3.29E-05"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/calf.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_left_KFE_collision">
+            <origin rpy="0 -0.21 0" xyz="0.008 0 -0.06"/>
+            <geometry>
+                <cylinder length="0.12" radius="0.012"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fl_knee"
+            type="revolute">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="front_left_HFE_link"/>
+        <child
+                link="front_left_KFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-2.7227"
+                upper="-0.83776"
+                effort="45.43"
+                velocity="15.70"/>
+    </joint>
+    <!-- The following link-joint chain: calflower -> calflower1 etc. is not connected to the foot contact frame and just there for collision modelling purposes-->
+    <link
+            name="FL_calflower">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.065" radius="0.011"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="FL_calflower_joint"
+            type="fixed">
+        <origin
+                xyz="0.020 0 -0.148"
+                rpy="0 0.05 0"/>
+        <parent
+                link="front_left_KFE_link"/>
+        <child
+                link="FL_calflower"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="FL_calflower1">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.0155"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="FL_calflower1_joint"
+            type="fixed">
+        <origin
+                xyz="-0.01 0 -0.04"
+                rpy="0 0.48 0"/>
+        <parent
+                link="FL_calflower"/>
+        <child
+                link="FL_calflower1"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="fl_contact">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.04"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/foot.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_left_foot_collision">
+            <origin rpy="0 0 0" xyz="-0.002 0 0"/>
+            <geometry>
+                <sphere radius="0.022"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hydroelastic_modulus value="3e5"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_dynamic value="4.0"/>
+                <drake:mu_static value="4.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fl_contact_frame"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="front_left_KFE_link"/>
+        <child
+                link="fl_contact"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+
+
+    <transmission name="trans_fl_abad">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_abad">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_abad">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fl_shoulder">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_shoulder">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_shoulder">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fl_knee">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fl_knee">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fl_knee">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+
+
+    <link
+            name="front_right_HAA_link">
+        <inertial>
+            <origin
+                    xyz="-0.0054 -0.00194 -0.000105"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.678"/>
+            <inertia
+                    ixx="0.00048"
+                    ixy="3.01E-06"
+                    ixz="1.11E-06"
+                    iyy="0.000884"
+                    iyz="1.42E-06"
+                    izz="0.000596"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="3.1415 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/hip.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0"/>
+            <geometry>
+                <cylinder length="0.04" radius="0.046"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fr_abad"
+            type="revolute">
+        <origin
+                xyz="0.1934 -0.0465 0"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="front_right_HAA_link"/>
+        <axis
+                xyz="1 0 0"/>
+        <limit
+                lower="-1.0472"
+                upper="1.0472"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="front_right_HFE_link">
+        <inertial>
+            <origin
+                    xyz="-0.00374 0.0223 -0.0327"
+                    rpy="0 0 0"/>
+            <mass
+                    value="1.152"/>
+            <inertia
+                    ixx="0.00584"
+                    ixy="-8.72E-05"
+                    ixz="-0.000289"
+                    iyy="0.0058"
+                    iyz="-0.000808"
+                    izz="0.00103"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/thigh_mirror.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_right_HFE_collision">
+            <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065"/>
+            <geometry>
+                <box size="0.213 0.0245 0.034"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.19"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fr_shoulder"
+            type="revolute">
+        <origin
+                xyz="0 -0.0955 0"
+                rpy="0 0 0"/>
+        <parent
+                link="front_right_HAA_link"/>
+        <child
+                link="front_right_HFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-1.5708"
+                upper="3.4907"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="front_right_KFE_link">
+        <inertial>
+            <origin
+                    xyz="0.00548 0.000975 -0.115"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.154"/>
+            <inertia
+                    ixx="0.00108"
+                    ixy="-3.4E-07"
+                    ixz="1.72E-05"
+                    iyy="0.0011"
+                    iyz="-8.28E-06"
+                    izz="3.29E-05"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/calf_mirror.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_right_KFE_collision">
+            <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06"/>
+            <geometry>
+                <cylinder length="0.12" radius="0.013"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fr_knee"
+            type="revolute">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="front_right_HFE_link"/>
+        <child
+                link="front_right_KFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-2.7227"
+                upper="-0.83776"
+                effort="45.43"
+                velocity="15.70"/>
+    </joint>
+    <link
+            name="FR_calflower">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.065" radius="0.011"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="FR_calflower_joint"
+            type="fixed">
+        <origin
+                xyz="0.020 0 -0.148"
+                rpy="0 0.05 0"/>
+        <parent
+                link="front_right_KFE_link"/>
+        <child
+                link="FR_calflower"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="FR_calflower1">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.0155"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="FR_calflower1_joint"
+            type="fixed">
+        <origin
+                xyz="-0.01 0 -0.04"
+                rpy="0 0.48 0"/>
+        <parent
+                link="FR_calflower"/>
+        <child
+                link="FR_calflower1"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="fr_contact">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.04"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/foot.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="front_right_foot_collision">
+            <origin rpy="0 0 0" xyz="-0.002 0 0"/>
+            <geometry>
+                <sphere radius="0.022"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hydroelastic_modulus value="3e5"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_dynamic value="4.0"/>
+                <drake:mu_static value="4.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="fr_contact_frame"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="front_right_KFE_link"/>
+        <child
+                link="fr_contact"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+
+
+    <transmission name="trans_fr_abad">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fr_abad">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fr_abad">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fr_shoulder">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fr_shoulder">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fr_shoulder">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_fr_knee">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="fr_knee">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_fr_knee">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+
+
+    <!-- rear legs -->
+    <link
+            name="back_left_HAA_link">
+        <inertial>
+            <origin
+                    xyz="0.0054 0.00194 -0.000105"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.678"/>
+            <inertia
+                    ixx="0.00048"
+                    ixy="3.01E-06"
+                    ixz="-1.11E-06"
+                    iyy="0.000884"
+                    iyz="-1.42E-06"
+                    izz="0.000596"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 3.1415 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/hip.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0"/>
+            <geometry>
+                <cylinder length="0.04" radius="0.046"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="bl_abad"
+            type="revolute">
+        <origin
+                xyz="-0.1934 0.0465 0"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="back_left_HAA_link"/>
+        <axis
+                xyz="1 0 0"/>
+        <limit
+                lower="-1.0472"
+                upper="1.0472"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="back_left_HFE_link">
+        <inertial>
+            <origin
+                    xyz="-0.00374 -0.0223 -0.0327"
+                    rpy="0 0 0"/>
+            <mass
+                    value="1.152"/>
+            <inertia
+                    ixx="0.00584"
+                    ixy="8.72E-05"
+                    ixz="-0.000289"
+                    iyy="0.0058"
+                    iyz="0.000808"
+                    izz="0.00103"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/thigh.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_left_HFE_link">
+            <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065"/>
+            <geometry>
+                <box size="0.213 0.0245 0.034"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.06"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="bl_shoulder"
+            type="revolute">
+        <origin
+                xyz="0 0.0955 0"
+                rpy="0 0 0"/>
+        <parent
+                link="back_left_HAA_link"/>
+        <child
+                link="back_left_HFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-0.5236"
+                upper="4.5379"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="back_left_KFE_link">
+        <inertial>
+            <origin
+                    xyz="0.00548 -0.000975 -0.115"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.154"/>
+            <inertia
+                    ixx="0.00108"
+                    ixy="3.4E-07"
+                    ixz="1.72E-05"
+                    iyy="0.0011"
+                    iyz="8.28E-06"
+                    izz="3.29E-05"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/calf.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_left_KFE_collision">
+            <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06"/>
+            <geometry>
+                <cylinder length="0.12" radius="0.013"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="bl_knee"
+            type="revolute">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="back_left_HFE_link"/>
+        <child
+                link="back_left_KFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-2.7227"
+                upper="-0.83776"
+                effort="45.43"
+                velocity="15.70"/>
+    </joint>
+    <link
+            name="RL_calflower">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.065" radius="0.011"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="RL_calflower_joint"
+            type="fixed">
+        <origin
+                xyz="0.020 0 -0.148"
+                rpy="0 0.05 0"/>
+        <parent
+                link="back_left_KFE_link"/>
+        <child
+                link="RL_calflower"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="RL_calflower1">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.0155"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="RL_calflower1_joint"
+            type="fixed">
+        <origin
+                xyz="-0.01 0 -0.04"
+                rpy="0 0.48 0"/>
+        <parent
+                link="RL_calflower"/>
+        <child
+                link="RL_calflower1"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="bl_contact">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.04"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/foot.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_left_foot_collision">
+            <origin rpy="0 0 0" xyz="-0.002 0 0"/>
+            <geometry>
+                <sphere radius="0.022"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hydroelastic_modulus value="3e5"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_dynamic value="4.0"/>
+                <drake:mu_static value="4.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="bl_contact_frame"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="back_left_KFE_link"/>
+        <child
+                link="bl_contact"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+
+
+    <transmission name="trans_bl_abad">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="bl_abad">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_bl_abad">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_bl_shoulder">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="bl_shoulder">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_bl_shoulder">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_bl_knee">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="bl_knee">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_bl_knee">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+
+
+    <link
+            name="back_right_HAA_link">
+        <inertial>
+            <origin
+                    xyz="0.0054 -0.00194 -0.000105"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.678"/>
+            <inertia
+                    ixx="0.00048"
+                    ixy="-3.01E-06"
+                    ixz="-1.11E-06"
+                    iyy="0.000884"
+                    iyz="1.42E-06"
+                    izz="0.000596"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="3.1415 3.1415 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/hip.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0"/>
+            <geometry>
+                <cylinder length="0.04" radius="0.046"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="br_abad"
+            type="revolute">
+        <origin
+                xyz="-0.1934 -0.0465 0"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="back_right_HAA_link"/>
+        <axis
+                xyz="1 0 0"/>
+        <limit
+                lower="-1.0472"
+                upper="1.0472"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="back_right_HFE_link">
+        <inertial>
+            <origin
+                    xyz="-0.00374 0.0223 -0.0327"
+                    rpy="0 0 0"/>
+            <mass
+                    value="1.152"/>
+            <inertia
+                    ixx="0.00584"
+                    ixy="-8.72E-05"
+                    ixz="-0.000289"
+                    iyy="0.0058"
+                    iyz="-0.000808"
+                    izz="0.00103"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/thigh_mirror.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_right_HFE_collision">
+            <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065"/>
+            <geometry>
+                <box size="0.213 0.0245 0.034"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.06"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="br_shoulder"
+            type="revolute">
+        <origin
+                xyz="0 -0.0955 0"
+                rpy="0 0 0"/>
+        <parent
+                link="back_right_HAA_link"/>
+        <child
+                link="back_right_HFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-0.5236"
+                upper="4.5379"
+                effort="23.7"
+                velocity="30.1"/>
+    </joint>
+    <link
+            name="back_right_KFE_link">
+        <inertial>
+            <origin
+                    xyz="0.00548 0.000975 -0.115"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.154"/>
+            <inertia
+                    ixx="0.00108"
+                    ixy="-3.4E-07"
+                    ixz="1.72E-05"
+                    iyy="0.0011"
+                    iyz="-8.28E-06"
+                    izz="3.29E-05"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/calf_mirror.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_right_KFE_collision">
+            <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06"/>
+            <geometry>
+                <cylinder length="0.12" radius="0.013"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="br_knee"
+            type="revolute">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="back_right_HFE_link"/>
+        <child
+                link="back_right_KFE_link"/>
+        <axis
+                xyz="0 1 0"/>
+        <limit
+                lower="-2.7227"
+                upper="-0.83776"
+                effort="45.43"
+                velocity="15.70"/>
+    </joint>
+    <link
+            name="RR_calflower">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.065" radius="0.011"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="RR_calflower_joint"
+            type="fixed">
+        <origin
+                xyz="0.020 0 -0.148"
+                rpy="0 0.05 0"/>
+        <parent
+                link="back_right_KFE_link"/>
+        <child
+                link="RR_calflower"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="RR_calflower1">
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.0155"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:hydroelastic_modulus value="5e7"/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hunt_crossley_dissipation value="0.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="RR_calflower1_joint"
+            type="fixed">
+        <origin
+                xyz="-0.01 0 -0.04"
+                rpy="0 0.48 0"/>
+        <parent
+                link="RR_calflower"/>
+        <child
+                link="RR_calflower1"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="br_contact">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0.04"/>
+            <inertia
+                    ixx="9.6e-06"
+                    ixy="0"
+                    ixz="0"
+                    iyy="9.6e-06"
+                    iyz="0"
+                    izz="9.6e-06"/>
+        </inertial>
+        <visual>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <geometry>
+                <mesh
+                        filename="../dae/foot.dae"/>
+            </geometry>
+            <material
+                    name="">
+                <color
+                        rgba="1 1 1 1"/>
+            </material>
+        </visual>
+        <collision name="back_right_foot_collision">
+            <origin rpy="0 0 0" xyz="-0.002 0 0"/>
+            <geometry>
+                <sphere radius="0.022"/>
+            </geometry>
+            <drake:proximity_properties>
+                <drake:compliant_hydroelastic/>
+                <drake:mesh_resolution_hint value="0.02"/>
+                <drake:hydroelastic_modulus value="3e5"/>
+                <drake:hunt_crossley_dissipation value="50.0"/>
+                <drake:mu_dynamic value="4.0"/>
+                <drake:mu_static value="4.0"/>
+            </drake:proximity_properties>
+        </collision>
+    </link>
+    <joint
+            name="br_contact_frame"
+            type="fixed" dont_collapse="true">
+        <origin
+                xyz="0 0 -0.213"
+                rpy="0 0 0"/>
+        <parent
+                link="back_right_KFE_link"/>
+        <child
+                link="br_contact"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+
+
+    <transmission name="trans_br_abad">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="br_abad">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_br_abad">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_br_shoulder">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="br_shoulder">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_br_shoulder">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+    <transmission name="trans_br_knee">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="br_knee">
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="act_br_knee">
+            <mechanicalReduction>1.0</mechanicalReduction>
+            <hardwareInterface>PositionJointInterface</hardwareInterface>
+            <drake:rotor_inertia value="0.05"/>
+        </actuator>
+    </transmission>
+
+
+    <link
+            name="link_imu">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0"/>
+            <inertia
+                    ixx="0"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0"
+                    iyz="0"
+                    izz="0"/>
+        </inertial>
+    </link>
+    <joint
+            name="imu_joint"
+            type="fixed">
+        <origin
+                xyz="-0.02557 0 0.04232"
+                rpy="0 0 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="link_imu"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+    <link
+            name="radar">
+        <inertial>
+            <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+            <mass
+                    value="0"/>
+            <inertia
+                    ixx="0"
+                    ixy="0"
+                    ixz="0"
+                    iyy="0"
+                    iyz="0"
+                    izz="0"/>
+        </inertial>
+    </link>
+    <joint
+            name="radar_joint"
+            type="fixed">
+        <origin
+                xyz="0.28945 0 -0.046825"
+                rpy="0 2.8782 0"/>
+        <parent
+                link="base_link"/>
+        <child
+                link="radar"/>
+        <axis
+                xyz="0 0 0"/>
+    </joint>
+</robot>

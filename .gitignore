@@ -1,0 +1,116 @@
+ct_lib/
+
+.vscode/
+.idea/
+
+# Created by https://www.toptal.com/developers/gitignore/api/ros2,c++
+# Edit at https://www.toptal.com/developers/gitignore?templates=ros2,c++
+
+### C++ ###
+# clangd-cache
+*.cache
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### ROS2 ###
+install/
+log/
+build/
+
+# Ignore generated docs
+*.dox
+*.wikidoc
+
+# eclipse stuff
+.project
+.cproject
+
+# qcreator stuff
+CMakeLists.txt.user
+
+srv/_*.py
+*.pcd
+*.pyc
+qtcreator-*
+*.user
+
+*~
+
+# Emacs
+.#*
+
+# Colcon custom files
+COLCON_IGNORE
+AMENT_IGNORE
+
+# End of https://www.toptal.com/developers/gitignore/api/ros2,c++
+
+### Python ###
+__pycache__/
+
+### compile commands
+ws/src/simulator/cmake_commands.sh
+
+### clion
+ws/.idea/**
+
+rosbag*
+ws/src/drivers/cmake_commands.sh
+
+
+ws/src/common/launch/simulation.launch.py
+ws/build.ninja
+
+ws/cmake_install.cmake
+
+ws/CMakeCache.txt
+
+ws/compile_commands.json
+
+ws/CTestConfiguration.ini
+
+ws/CTestCustom.cmake
+
+ws/CTestTestfile.cmake
+
+ws/src/controllers/cmake_commands.sh
+
+ws/symlink_install_manifest.txt
+
+**/cmake-build-debug/**
+
+ws/src/common/cmake_commands.sh
+
+ws/src/state_estimation/cmake_commands.sh
+
+ws/force_contact.xml

@@ -1,0 +1,9 @@
+std_msgs/Header header
+
+uint32 num_early_contacts
+uint32 num_mpc_solver_overtime
+uint32 num_wbc_overtime
+uint32 num_mpc_solver_fail
+uint32 num_wbc_solver_fail
+uint32 num_model_updates
+bool keep_pose_active

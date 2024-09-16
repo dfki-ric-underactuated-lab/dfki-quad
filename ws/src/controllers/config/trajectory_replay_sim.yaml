@@ -1,0 +1,70 @@
+trajectory_replay:
+  ros__parameters:
+    csv_name: planarProblemSaltoForward17032023_frameCorrected_interp.csv
+    # csv_name: left_turn0_trajectory_600_interp.csv
+    # csv_name: backflip_contact_frameCorrected_ros2_interp500.csv
+    # csv_name: simple_cartesian.csv
+    cartesian_control: False
+    cartesian_stiffness: True # use cartesian stiffness gains instead of joint level gains. Has to match contrller in leg_driver
+    xy_correction: True # set x=0 and y=0 at shoulder position in cartesian control
+    update_freq: 600.0
+    repeat_n_times: 1
+    repeat_from_timestep: 0
+    state_machine: False
+    initial_interpolation: True
+    publish_state: True
+    kd_damping: 1.0
+
+    # gains for init phase
+    kp_abad_init: 20.0
+    kp_hip_init: 20.0
+    kp_knee_init: 20.0
+
+    kd_abad_init: 5.0
+    kd_hip_init: 5.0
+    kd_knee_init: 5.0
+
+    # gains during trajectory replay
+    kp_abad: 20.0
+    kp_hip_front: 20.0
+    kp_knee_front: 20.0
+    kp_hip_back: 20.0
+    kp_knee_back: 20.0
+
+    kd_abad: 5.0
+    kd_hip_front: 5.0
+    kd_knee_front: 5.0
+    kd_hip_back: 5.0
+    kd_knee_back: 5.0
+
+
+    # cartesian stiffness gains init phase
+    kp_x_front_init: 10.0
+    kp_y_front_init: 300.0
+    kp_z_front_init: 300.0
+    kp_x_back_init: 150.0
+    kp_y_back_init: 150.0
+    kp_z_back_init: 10.0
+
+    kd_x_front_init: 5.0
+    kd_y_front_init: 5.0
+    kd_z_front_init: 5.0
+    kd_x_back_init: 5.0
+    kd_y_back_init: 5.0
+    kd_z_back_init: 5.0
+
+    # cartesian stiffness gains during trajectory replay
+    kp_x_front_trajectory: 1.0
+    kp_y_front_trajectory: 1.0
+    kp_z_front_trajectory: 1.0
+    kp_x_back_trajectory: 1.0
+    kp_y_back_trajectory: 1.0
+    kp_z_back_trajectory: 1.0
+
+    kd_x_front_trajectory: 1.0
+    kd_y_front_trajectory: 1.0
+    kd_z_front_trajectory: 1.0
+    kd_x_back_trajectory: 1.0
+    kd_y_back_trajectory: 1.0
+    kd_z_back_trajectory: 1.0
+

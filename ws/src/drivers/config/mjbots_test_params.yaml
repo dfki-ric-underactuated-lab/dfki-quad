@@ -1,0 +1,123 @@
+mjbots_ros2_motor_driver:
+  ros__parameters:
+    imu_mounting_deg:
+      roll: -90.0
+      pitch: 90.0
+      yaw: 180.0
+    attitude_rate_hz: 400.0
+    cmd_send_frequency: 400.0 # in Hz
+    state_pub_frequency: 400.0 # in Hz
+    watchdog_limit: 100
+    motor_names: [ fl_abad, fl_shoulder, fl_knee,
+                   fr_abad, fr_shoulder, fr_knee,
+                   bl_abad, bl_shoulder, bl_knee,
+                   br_abad, br_shoulder, br_knee ]
+    fl_abad:
+      bus_id: 1
+      motor_id: 1
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: -0.40023890137672424
+    fl_shoulder:
+      bus_id: 1
+      motor_id: 2
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: -1.0763095617294312
+    fl_knee:
+      bus_id: 1
+      motor_id: 3
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: 2.5805041790008545
+    fr_abad:
+      bus_id: 2
+      motor_id: 4
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: 0.4530176520347595
+    fr_shoulder:
+      bus_id: 2
+      motor_id: 5
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: -1.0668848752975464
+    fr_knee:
+      bus_id: 2
+      motor_id: 6
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: 2.5936989784240723
+    bl_abad:
+      bus_id: 3
+      motor_id: 7
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: -0.4153185486793518
+    bl_shoulder:
+      bus_id: 3
+      motor_id: 8
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: -1.0675132274627686
+    bl_knee:
+      bus_id: 3
+      motor_id: 9
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: -1
+      zero_offset: 2.588672399520874
+    br_abad:
+      bus_id: 4
+      motor_id: 10
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: 0.45176103711128235
+    br_shoulder:
+      bus_id: 4
+      motor_id: 11
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: -1.0643715858459473
+    br_knee:
+      bus_id: 4
+      motor_id: 12
+      fixed_gains: false
+      Kp: 0.0
+      Kd: 0.0
+      max_torque: 12.0
+      direction: 1
+      zero_offset: 2.5968406200408936
+

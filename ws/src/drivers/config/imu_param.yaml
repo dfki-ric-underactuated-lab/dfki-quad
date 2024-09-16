@@ -1,0 +1,12 @@
+imu_param:
+  imu_mounting_deg:
+    roll: 90
+    pitch: 0
+    yaw: 0
+  attitude_rate_hz: 400
+
+    #Set IMU world offset to be a rotation of 180-deg about the x-axis
+    #imu_world_offset_deg.roll: 0
+    #imu_world_offset_deg.pitch: 0
+    #imu_world_offset_deg.yaw: 0
+  

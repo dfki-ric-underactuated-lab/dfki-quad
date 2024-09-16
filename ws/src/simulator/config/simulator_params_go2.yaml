@@ -1,0 +1,26 @@
+drake_simulator:
+  ros__parameters:
+    robot_urdf: "src/common/model/urdf/go2/urdf/go2_description.urdf"   # The URDF of the quadruped
+    # world_urdf: "src/common/model/urdf/terrain.urdf"  # The URDF of the world environment
+    world_urdf: "src/common/model/urdf/plane.urdf"  # The URDF of the world environment
+    world_fix_link: "plane_base_link"               # The base_link name of the world environment
+    simulator_discretization_frequency: 1000.       # Discretization frequency of the simulator
+    imu_publish_frequency: 100.                     # Publish frequency of the IMU readings (has to be less or equal to simulator_discretization_frequency)
+    joint_state_publish_frequency: 1000.            # Publish frequency of the Joint states readings (has to be less or equal to simulator_discretization_frequency)
+    sim_clock_publish_frequency: 1000.              # Publish frequency of the simulation clock under /clock topic (has to be less or equal to simulator_discretization_frequency)
+    simulator_realtime_rate: 1.0                    # Target realtime rate that the simulation tries to reach (1=Realtime, 0=As fast as possible)
+    visualisation: true                             # If the simulation should provide a meshcat visualization
+    visualisation_update_rate: 0.05                 # Update rate of the meshcat visualization provided by simulation
+    init_kp: 50.0                                   # Initial P gain of the joints' PD controller
+    init_kd: 5.0                                    # Initial D gain of the joints' PD controller
+    respect_effort_limits: false                    # If the joint torque limits as defined in the URDF should be respected
+    publish_quad_state: true                        # If the quad state should be published under /quad_state (replaces the state estimation)
+    robot_foot_collision_names: [ "go2_description::front_left_foot_collision", # List of collision element names of the robot feet that are published as contacts in the /quad_state
+                                  "go2_description::front_right_foot_collision",
+                                  "go2_description::back_left_foot_collision",
+                                  "go2_description::back_right_foot_collision" ]
+    imu_link: "link_imu"                            # Name of the IMU link as a reference for the imu readings
+    reference_link: "base_link"                     # Name of the robot's reference link for pose and twist readings in /quad_state
+    manually_step_sim: false                        # If enabled, the simulation ignores the simulator_realtime_rate and the simulation pauses. Instead, a service /step_sim provides manual stepping
+    initial_robot_height: 0.4                      # Spawn height of the robot
+    initial_joint_positions: [ 0.126, 0.61, -1.22, -0.126, 0.61, -1.22, 0.126, 0.61, -1.22, -0.126, 0.61, -1.22 ]

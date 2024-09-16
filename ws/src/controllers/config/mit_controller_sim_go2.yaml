@@ -1,0 +1,79 @@
+mit_controller_node: ##### SIMULATION
+  ros__parameters:
+    use_sim_time: True
+    initial_height: 0.30
+    leg_control_mode: 0 # 0: wbc; 3: ikin
+    joint_control_gains: # wbc
+      swing_Kp: [ 0.0, 0.0, 0.0 ]
+      swing_Kd: [ 0.0, 0.0, 0.0 ]
+      stance_Kp: [ 0.0, 0.0, 0.0 ]
+      stance_Kd: [ 0.0, 0.0, 0.0 ]
+    cartesian_joint_control_gains:
+      swing_Kp: [ 10.0, 10.0, 10.0 ]
+      swing_Kd: [ 5.0, 5.0, 5.0 ]
+      stance_Kp: [ 2.0,2.0,2.0 ]
+      stance_Kd: [ 5.0, 5.0, 5.0 ]
+    cartesian_stiffness_control_gains:
+      swing_Kp: [ 500.0, 500.0, 1000.0 ]
+      swing_Kd: [ 300.0, 300.0, 500.0 ]
+      stance_Kp: [ 50.0, 50.0, 1000.0 ]
+      stance_Kd: [ 30.0, 30.0, 30.0 ]
+    slc_swing_height: 0.05
+    slc_world_blend: 1.0
+    mpc_alpha: 0.00001
+    mpc_solver: "PARTIAL_CONDENSING_HPIPM"
+    mpc_warm_start: 1 # 0: off,  1: warm start, 2: hot start (some solvers)
+    ########################## roll, pitch, yaw, x   , y   ,  z, rolld,pitchd,yawd, xd, yd , zd
+    mpc_state_weights_stand: [ 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
+    # mpc_state_weights_move: [ 150.0, 150.0, 50.0, 0.0, 0.0, 80.0, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3 ]
+    mpc_state_weights_move: [ 20.0, 200.0, 50.0, 0.0001, 0.0001, 100.0, 0.2, 0.2, 0.8, 20.0, 20.0, 0.3 ]
+    mpc_mu: 0.6
+    mpc_fmin: 0.0
+    mpc_fmax: 400.0
+    gs_shoulder_positions: [
+      0.167, 0.1738, 0.0,
+      0.167, -0.1738, 0.0,
+      -0.197, 0.1738, 0.0,
+      -0.197, -0.1738, 0.0
+    ]
+    raibert:
+      k: 0.03
+      filtersize: 20
+      z_on_plane: false
+    early_contact_detection: true
+    late_contact_detection: false
+    late_contact_reschedule_swing_phase: true
+    lost_contact_detection: false
+    fix_standing_position: true
+    maximum_swing_leg_progress_to_update_target: 0.5
+    adaptive_gait_sequencer:
+      gait:
+        disturbance_correction: 0.0
+    wbc:
+      inverse_dynamics:
+        foot_position_based_on_target_height: false
+        foot_position_based_on_target_orientation: false
+        transformation_filter_size: 20
+      arc_opt:
+        solver: "EiquadprogSolver"
+        model_urdf: "src/common/model/urdf/go2/urdf/go2_description.urdf"
+        feet_names: [ "fl_contact", "fr_contact","bl_contact", "br_contact" ]
+        joint_names: [ "fl_abad", "fl_shoulder", "fl_knee", "fr_abad", "fr_shoulder", "fr_knee", "bl_abad", "bl_shoulder", "bl_knee", "br_abad", "br_shoulder", "br_knee" ]
+        mu: 0.45
+        ################## x,y,z, roll, pitch, yaw
+        com_pose_weight: [ 10.,10.,10.,10.,10.,10. ]
+        com_pose_Kp: [ 300.,300.,300.,200.,200.,200. ]
+        com_pose_Kd: [ 100.,100.,100.,100.,100.,100. ]
+        ################## fx, fy, fz
+        foot_force_weight: [ 30.,30.,30. ]
+        ################## x,y,z
+        foot_pose_weight: [ 10.0,10.0,10.0 ]
+        feet_pose_Kp: [ 1200.,1200.,1200. ]
+        feet_pose_Kd: [ 500.,500.,400. ]
+    model_parameter_weights: [ 1.0, 0.5, 0.5, 0.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ]
+joy_to_target:
+  ros__parameters:
+    init_robot_height: 0.30
+    max_robot_height: 0.40
+    max_acceleration: 0.5
+
