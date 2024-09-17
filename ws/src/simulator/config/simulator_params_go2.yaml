@@ -9,6 +9,7 @@ drake_simulator:
     joint_state_publish_frequency: 1000.            # Publish frequency of the Joint states readings (has to be less or equal to simulator_discretization_frequency)
     sim_clock_publish_frequency: 1000.              # Publish frequency of the simulation clock under /clock topic (has to be less or equal to simulator_discretization_frequency)
     simulator_realtime_rate: 1.0                    # Target realtime rate that the simulation tries to reach (1=Realtime, 0=As fast as possible)
+    manually_step_sim: false                        # The simulator than is paused at the beginning and waits for the service call `/step_sim`
     visualisation: true                             # If the simulation should provide a meshcat visualization
     visualisation_update_rate: 0.05                 # Update rate of the meshcat visualization provided by simulation
     init_kp: 50.0                                   # Initial P gain of the joints' PD controller

@@ -1,3 +1,6 @@
 quadprog
 numpy
 cmakelang
+pandas
+rosbags
+typing

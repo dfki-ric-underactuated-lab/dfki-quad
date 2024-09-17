@@ -20,18 +20,22 @@ from std_srvs.srv import Trigger
 
 class ExperimentPlayer(Node):
     def __init__(self):
-        super().__init__('experiment_player')
+        super().__init__("experiment_player")
         # create publisher
-        self.control_target_pub = self.create_publisher(QuadControlTarget, 'quad_control_target', 10)
-        self.damping_client = self.create_client(Trigger, '/set_emergency_damping_mode')
-        self.param_client = self.create_client(SetParameters, '/mit_controller_node/set_parameters')
+        self.control_target_pub = self.create_publisher(
+            QuadControlTarget, "quad_control_target", 10
+        )
+        self.damping_client = self.create_client(Trigger, "/set_emergency_damping_mode")
+        self.param_client = self.create_client(
+            SetParameters, "/mit_controller_node/set_parameters"
+        )
         self.stop_msg = QuadControlTarget()
-        self.stop_msg.body_x_dot = 0.
-        self.stop_msg.body_y_dot = 0.
+        self.stop_msg.body_x_dot = 0.0
+        self.stop_msg.body_y_dot = 0.0
         self.stop_msg.world_z = 0.30
-        self.stop_msg.hybrid_theta_dot = 0.
-        self.stop_msg.pitch = 0.
-        self.stop_msg.roll = 0.
+        self.stop_msg.hybrid_theta_dot = 0.0
+        self.stop_msg.pitch = 0.0
+        self.stop_msg.roll = 0.0
 
         self.playout = False
         self.playout_lock = threading.Lock()
@@ -53,7 +57,9 @@ class ExperimentPlayer(Node):
             return
         self.playout = True
         self.playout_lock.release()
-        self.playout_thread = threading.Thread(target=self.playout_experiment, args=[action_list])
+        self.playout_thread = threading.Thread(
+            target=self.playout_experiment, args=[action_list]
+        )
         self.playout_thread.start()
         self.get_logger().info(f"Started playout async")
 
@@ -101,23 +107,39 @@ class ExperimentPlayer(Node):
 
 class SolverExperiments(Node):
     def __init__(self, working_folder: str):
-        super().__init__('solver_experiments')
+        super().__init__("solver_experiments")
 
         self.working_folder = working_folder
         self.quad_state = None
-        self.sim_reset_client = self.create_client(ResetSimulation, '/reset_sim')
+        self.sim_reset_client = self.create_client(ResetSimulation, "/reset_sim")
         self.reset_request = ResetSimulation.Request()
-        self.leg_driver_switch_mode_client = self.create_client(ChangeLegDriverMode, '/switch_op_mode')
-        self.keep_pose_client = self.create_client(KeepJointPositions, "/keep_joint_pose")
+        self.leg_driver_switch_mode_client = self.create_client(
+            ChangeLegDriverMode, "/switch_op_mode"
+        )
+        self.keep_pose_client = self.create_client(
+            KeepJointPositions, "/keep_joint_pose"
+        )
         self.sim_reset_request = ResetSimulation.Request()
         self.leg_driver_switch_mode_request = ChangeLegDriverMode.Request()
         self.leg_driver_keep_pose_request = KeepJointPositions.Request()
         self.leg_driver_switch_mode_request.target_mode = 2  # KEEP_POSE
-        self.leg_driver_keep_pose_request.joint_positions = [0.126, 0.61, -1.22,
-                                                             -0.126, 0.61, -1.22,
-                                                             0.126, 0.61, -1.22,
-                                                             -0.126, 0.61, -1.22]
-        self.quad_state_sub = self.create_subscription(QuadState, "quad_state", self.quad_state_callback, 1)
+        self.leg_driver_keep_pose_request.joint_positions = [
+            0.126,
+            0.61,
+            -1.22,
+            -0.126,
+            0.61,
+            -1.22,
+            0.126,
+            0.61,
+            -1.22,
+            -0.126,
+            0.61,
+            -1.22,
+        ]
+        self.quad_state_sub = self.create_subscription(
+            QuadState, "quad_state", self.quad_state_callback, 1
+        )
         self.recording_subprocess = None
         self.playback_subprocess = None
         self.failed_experiments = []
@@ -129,16 +151,19 @@ class SolverExperiments(Node):
         self.player = ExperimentPlayer()
         config_file = "mit_controller_sim_go2.yaml"
         pkg_controllers = get_package_share_directory("controllers")
-        self.cpu_params_file = os.path.join(pkg_controllers, "config",
-                                            "cpu_power_logging.yaml")
-        self.controller_params_file = os.path.join(pkg_controllers, "config", config_file)
+        self.cpu_params_file = os.path.join(
+            pkg_controllers, "config", "cpu_power_logging.yaml"
+        )
+        self.controller_params_file = os.path.join(
+            pkg_controllers, "config", config_file
+        )
         self.get_logger().info("Controller params: " + self.controller_params_file)
 
         self.start_needed_nodes()
 
     def STOP(self):
         self.get_logger().info("---> Writing failed attempts file...")
-        f = open(os.path.join(self.working_folder, "failed_attempts.txt"), 'x')
+        f = open(os.path.join(self.working_folder, "failed_attempts.txt"), "x")
         f.write(str(self.failed_experiments))
         f.close()
         self.get_logger().info("<--- ")
@@ -155,10 +180,10 @@ class SolverExperiments(Node):
     def start_playback_rosbag(self, rosbag_file: str):
         if self.playback_subprocess is None:
             self.playback_subprocess = subprocess.Popen(
-                ['ros2', 'bag', 'play', rosbag_file],
+                ["ros2", "bag", "play", rosbag_file],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                stdin=subprocess.DEVNULL
+                stdin=subprocess.DEVNULL,
             )
 
     def stop_playout_rosbag(self):
@@ -167,25 +192,31 @@ class SolverExperiments(Node):
             self.playback_subprocess = None
 
     def robot_fell(self):
-        return (self.quad_state.pose.pose.position.z < 0.1
-                # abad joint angle
-                or abs(self.quad_state.joint_state.position[0]) > 0.785
-                or abs(self.quad_state.joint_state.position[3]) > 0.785
-                or abs(self.quad_state.joint_state.position[6]) > 0.785
-                or abs(self.quad_state.joint_state.position[9]) > 0.785
-                # inverted knee
-                or self.quad_state.joint_state.position[2] > 0.02
-                or self.quad_state.joint_state.position[5] > 0.02
-                or self.quad_state.joint_state.position[8] > 0.02
-                or self.quad_state.joint_state.position[11] > 0.02
-                )  # FIXME: add more indicators
+        return (
+            self.quad_state.pose.pose.position.z < 0.1
+            # abad joint angle
+            or abs(self.quad_state.joint_state.position[0]) > 0.785
+            or abs(self.quad_state.joint_state.position[3]) > 0.785
+            or abs(self.quad_state.joint_state.position[6]) > 0.785
+            or abs(self.quad_state.joint_state.position[9]) > 0.785
+            # inverted knee
+            or self.quad_state.joint_state.position[2] > 0.02
+            or self.quad_state.joint_state.position[5] > 0.02
+            or self.quad_state.joint_state.position[8] > 0.02
+            or self.quad_state.joint_state.position[11] > 0.02
+        )  # FIXME: add more indicators
 
     def start_record_bag(self, bag_file: str):
         storage_options = rosbag2_py.StorageOptions(bag_file)
         record_options = rosbag2_py.RecordOptions()
-        record_options.topics = ['/solve_time', '/cpu_power_consumption', '/wbc_solve_time']
-        self.recording_subprocess = threading.Thread(target=self.bag_recorder.record,
-                                                     args=[storage_options, record_options])
+        record_options.topics = [
+            "/solve_time",
+            "/cpu_power_consumption",
+            "/wbc_solve_time",
+        ]
+        self.recording_subprocess = threading.Thread(
+            target=self.bag_recorder.record, args=[storage_options, record_options]
+        )
         self.recording_subprocess.start()
 
     # self.recording_subprocess = subprocess.Popen(
@@ -205,7 +236,15 @@ class SolverExperiments(Node):
     def start_power_consumption_node(self):
         if self.cpu_process is None:
             self.cpu_process = subprocess.Popen(
-                ['ros2', 'run', 'controllers', 'log_cpu_power', '--ros-args', '--params-file', self.cpu_params_file]
+                [
+                    "ros2",
+                    "run",
+                    "controllers",
+                    "log_cpu_power",
+                    "--ros-args",
+                    "--params-file",
+                    self.cpu_params_file,
+                ]
             )
 
     def stop_power_consumption_node(self):
@@ -216,9 +255,23 @@ class SolverExperiments(Node):
     def start_joy_node(self):
         if self.joy_to_target_process is None:
             self.joy_to_target_process = subprocess.Popen(
-                ['ros2', 'run', 'controllers', 'joy_to_target.py', '--ros-args', '-p', 'use_sim_time:=True',
-                 '-p', 'init_robot_height:=0.30', '-p', 'max_robot_height:=0.40', '-p', 'max_acceleration:=0.5', '-p',
-                 'use_sim_time:=True']
+                [
+                    "ros2",
+                    "run",
+                    "controllers",
+                    "joy_to_target.py",
+                    "--ros-args",
+                    "-p",
+                    "use_sim_time:=True",
+                    "-p",
+                    "init_robot_height:=0.30",
+                    "-p",
+                    "max_robot_height:=0.40",
+                    "-p",
+                    "max_acceleration:=0.5",
+                    "-p",
+                    "use_sim_time:=True",
+                ]
             )
 
     def stop_joy_node(self):
@@ -229,7 +282,7 @@ class SolverExperiments(Node):
     def start_leg_driver(self):
         if self.leg_driver_process is None:
             self.joy_to_target_process = subprocess.Popen(
-                ['ros2', 'launch', 'drivers', 'leg_driver_launch.py', 'sim:=go2'],
+                ["ros2", "launch", "drivers", "leg_driver_launch.py", "sim:=go2"],
             )
 
     def stop_leg_driver(self):
@@ -237,30 +290,42 @@ class SolverExperiments(Node):
             os.killpg(os.getpgid(self.leg_driver_process.pid), signal.SIGKILL)
             self.leg_driver_process = None
 
-    def run_controller(self, mpc_solver_name: str, mpc_hpipm_mode: str, mpc_condensed_size: int, wbc_solver_name: str,
-                       wbc_scene_name: str,
-                       gs_gait: str):
+    def run_controller(
+        self,
+        mpc_solver_name: str,
+        mpc_hpipm_mode: str,
+        mpc_condensed_size: int,
+        wbc_solver_name: str,
+        wbc_scene_name: str,
+        gs_gait: str,
+    ):
         self.controller_process = subprocess.Popen(
-            ['ros2', 'run', 'controllers', 'mitcontrollernode', '--ros-args',
-             '--params-file', self.controller_params_file,
-             '-p',
-             'mpc_solver:=' + mpc_solver_name,
-             '-p',
-             'mpc_condensed_size:=' + str(mpc_condensed_size),
-             '-p',
-             'mpc_hpipm_mode:=' + mpc_hpipm_mode,
-             '-p',
-             'wbc.arc_opt.solver:=' + wbc_solver_name,
-             '-p',
-             'wbc.arc_opt.scene:=' + wbc_scene_name,
-             '-p',
-             'simple_gait_sequencer.gait:=' + gs_gait,
-             '-p',
-             'use_sim_time:=True'
-             ],
+            [
+                "ros2",
+                "run",
+                "controllers",
+                "mitcontrollernode",
+                "--ros-args",
+                "--params-file",
+                self.controller_params_file,
+                "-p",
+                "mpc_solver:=" + mpc_solver_name,
+                "-p",
+                "mpc_condensed_size:=" + str(mpc_condensed_size),
+                "-p",
+                "mpc_hpipm_mode:=" + mpc_hpipm_mode,
+                "-p",
+                "wbc.arc_opt.solver:=" + wbc_solver_name,
+                "-p",
+                "wbc.arc_opt.scene:=" + wbc_scene_name,
+                "-p",
+                "simple_gait_sequencer.gait:=" + gs_gait,
+                "-p",
+                "use_sim_time:=True",
+            ],
             # stdout=subprocess.PIPE,
             # shell=True,
-            preexec_fn=os.setsid
+            preexec_fn=os.setsid,
         )
 
     def stop_controller(self):
@@ -290,10 +355,20 @@ class SolverExperiments(Node):
         self.sim_reset_request.pose.orientation.x = 0.0
         self.sim_reset_request.pose.orientation.y = 0.0
         self.sim_reset_request.pose.orientation.z = 0.0
-        self.sim_reset_request.joint_positions = [0.126, 0.61, -1.22,
-                                                  -0.126, 0.61, -1.22,
-                                                  0.126, 0.61, -1.22,
-                                                  -0.126, 0.61, -1.22]  # TODO: ggf adapt joint positions
+        self.sim_reset_request.joint_positions = [
+            0.126,
+            0.61,
+            -1.22,
+            -0.126,
+            0.61,
+            -1.22,
+            0.126,
+            0.61,
+            -1.22,
+            -0.126,
+            0.61,
+            -1.22,
+        ]  # TODO: ggf adapt joint positions
 
         self.sim_reset_client.call(self.sim_reset_request)
         return
@@ -320,9 +395,17 @@ class SolverExperiments(Node):
         self.stop_leg_driver()
         self.get_logger().info("<---")
 
-    def run_experiment(self, mpc_solver_name: str, mpc_hpipm_mode: str, mpc_condensed_size: int,
-                       wbc_solver_name: str, wbc_scene_name: str,
-                       gs_gait: str, action_list: list, target_bag_file: str) -> bool:
+    def run_experiment(
+        self,
+        mpc_solver_name: str,
+        mpc_hpipm_mode: str,
+        mpc_condensed_size: int,
+        wbc_solver_name: str,
+        wbc_scene_name: str,
+        gs_gait: str,
+        action_list: list,
+        target_bag_file: str,
+    ) -> bool:
         # Keep leg pose etc.
         self.get_logger().info("-----------------------")
         self.get_logger().info("Starting new experiment")
@@ -336,8 +419,14 @@ class SolverExperiments(Node):
         self.reset_simulation()
         self.get_logger().info("<---")
         self.get_logger().info("---> Start controller")
-        self.run_controller(mpc_solver_name, mpc_hpipm_mode, mpc_condensed_size, wbc_solver_name, wbc_scene_name,
-                            gs_gait)
+        self.run_controller(
+            mpc_solver_name,
+            mpc_hpipm_mode,
+            mpc_condensed_size,
+            wbc_solver_name,
+            wbc_scene_name,
+            gs_gait,
+        )
         self.get_logger().info("<---")
         self.get_logger().info("---> Sleep 7 secs")
         time.sleep(7)
@@ -395,22 +484,22 @@ def main(args=None):
     experiment_stand = [
         # 5 sec standing:
         [5, QuadControlTarget(world_z=0.3)],
-        #  do rp each for 5 sec 
+        #  do rp each for 5 sec
         [2, QuadControlTarget(world_z=0.3, pitch=radians(30))],
         [2, QuadControlTarget(world_z=0.3, pitch=radians(-30))],
         [2, QuadControlTarget(world_z=0.3, roll=radians(30))],
         [2, QuadControlTarget(world_z=0.3, roll=radians(-30))],
         [1, QuadControlTarget(world_z=0.3)],
         # now yaw carefully to +-30 degrees
-        [2., QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(30))],
+        [2.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(30))],
         [1, QuadControlTarget(world_z=0.3)],
-        [4., QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(-30))],
+        [4.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(-30))],
         [1, QuadControlTarget(world_z=0.3)],
-        [2., QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(30))],
+        [2.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(30))],
         # increase and decrese a bit the hight
-        [1., QuadControlTarget(world_z=0.4)],
-        [1., QuadControlTarget(world_z=0.2)],
-        [1., QuadControlTarget(world_z=0.3)],
+        [1.0, QuadControlTarget(world_z=0.4)],
+        [1.0, QuadControlTarget(world_z=0.2)],
+        [1.0, QuadControlTarget(world_z=0.3)],
     ]
 
     experiment_trot = [
@@ -423,7 +512,12 @@ def main(args=None):
         [0.2, QuadControlTarget(world_z=0.3, body_x_dot=0.4)],
         [5.0, QuadControlTarget(world_z=0.3, body_x_dot=0.5)],
         # now little right curve 180 degrees
-        [4.0, QuadControlTarget(world_z=0.3, body_x_dot=0.5, hybrid_theta_dot=radians(40))],
+        [
+            4.0,
+            QuadControlTarget(
+                world_z=0.3, body_x_dot=0.5, hybrid_theta_dot=radians(40)
+            ),
+        ],
         # now diagonal
         [0.2, QuadControlTarget(world_z=0.3, body_x_dot=0.5, body_y_dot=0.1)],
         [0.2, QuadControlTarget(world_z=0.3, body_x_dot=0.5, body_y_dot=0.2)],
@@ -444,28 +538,106 @@ def main(args=None):
         [0.2, QuadControlTarget(world_z=0.3, body_x_dot=0.0, body_y_dot=0.0)],
         [2.0, QuadControlTarget(world_z=0.3, body_x_dot=0.0, body_y_dot=0.0)],
         # now curve in place
-        [3.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=0.0)],
+        [
+            3.0,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=0.0
+            ),
+        ],
         # now backwards curve
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.1)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.2)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.3)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.4)],
-        [5.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.5)],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.1
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.2
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.3
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(40), body_x_dot=-0.4
+            ),
+        ],
+        [
+            5.0,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.5
+            ),
+        ],
         # stop again
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.4)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.3)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.2)],
-        [0.2, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.1)],
-        [3.0, QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=0.0)],
-
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.4
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.3
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.2
+            ),
+        ],
+        [
+            0.2,
+            QuadControlTarget(
+                world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=-0.1
+            ),
+        ],
+        [
+            3.0,
+            QuadControlTarget(world_z=0.3, hybrid_theta_dot=radians(0), body_x_dot=0.0),
+        ],
     ]
 
-    mpc_solvers = ["PARTIAL_CONDENSING_HPIPM", "PARTIAL_CONDENSING_OSQP", "FULL_CONDENSING_QPOASES",
-                   "FULL_CONDENSING_DAQP", "FULL_CONDENSING_HPIPM"]
+    mpc_solvers = [
+        "PARTIAL_CONDENSING_HPIPM",
+        "PARTIAL_CONDENSING_OSQP",
+        "FULL_CONDENSING_QPOASES",
+        "FULL_CONDENSING_DAQP",
+        "FULL_CONDENSING_HPIPM",
+    ]
     mpc_hpipm_modes = ["SPEED", "SPEED_ABS", "BALANCE", "ROBUST"]
     wbc_solvers = ["EiquadprogSolver", "ProxQPSolver", "QPOasesSolver", "HPIPMSolver"]
     wbc_scenes = ["AccelerationSceneReducedTSID", "AccelerationSceneTSID"]
-    mpc_condensed_sizes = [20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    mpc_condensed_sizes = [
+        20,
+        19,
+        18,
+        17,
+        16,
+        15,
+        14,
+        13,
+        12,
+        11,
+        10,
+        9,
+        8,
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1,
+    ]
     max_trials = 3
 
     for mpc_solver in mpc_solvers:
@@ -478,23 +650,44 @@ def main(args=None):
             for mpc_condensed_size in mpc_condensed_sizes:
                 for wbc_scene in wbc_scenes:
                     for wbc_solver in wbc_solvers:
-                        for experiment, experiment_name, experiment_gait in zip([experiment_stand, experiment_trot],
-                                                                                ["stand_exp", "trot_exp"],
-                                                                                ["STAND", "TROT"]):
+                        for experiment, experiment_name, experiment_gait in zip(
+                            [experiment_stand, experiment_trot],
+                            ["stand_exp", "trot_exp"],
+                            ["STAND", "TROT"],
+                        ):
                             for iteration in range(max_trials):
-                                target_bag = mpc_solver + "-" + mpc_hpipm_mode + "-" + str(
-                                    mpc_condensed_size) + "-" + experiment_name + "-" + str(
-                                    iteration) + "-" + wbc_solver + "-" + wbc_scene
-                                success = solver_experiments_node.run_experiment(mpc_solver, mpc_hpipm_mode,
-                                                                                 mpc_condensed_size,
-                                                                                 wbc_solver, wbc_scene, experiment_gait,
-                                                                                 experiment,
-                                                                                 target_bag)
+                                target_bag = (
+                                    mpc_solver
+                                    + "-"
+                                    + mpc_hpipm_mode
+                                    + "-"
+                                    + str(mpc_condensed_size)
+                                    + "-"
+                                    + experiment_name
+                                    + "-"
+                                    + str(iteration)
+                                    + "-"
+                                    + wbc_solver
+                                    + "-"
+                                    + wbc_scene
+                                )
+                                success = solver_experiments_node.run_experiment(
+                                    mpc_solver,
+                                    mpc_hpipm_mode,
+                                    mpc_condensed_size,
+                                    wbc_solver,
+                                    wbc_scene,
+                                    experiment_gait,
+                                    experiment,
+                                    target_bag,
+                                )
                                 if success:
                                     print("Experiment successful no more trials")
                                     break
                                 else:
-                                    print("Experiment failed -> if more trials available try again")
+                                    print(
+                                        "Experiment failed -> if more trials available try again"
+                                    )
     print("STOP --->")
     solver_experiments_node.STOP()
     print("<-----")

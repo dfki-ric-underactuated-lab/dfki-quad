@@ -120,15 +120,18 @@ Quadrupedal Walking__ follow the following instruction:
     export ROS_DOMAIN_ID=123 # Make sure both machines run on the same ROS 2 Domain ID
     ros2 launch simulator simulator.launch.py sim:=go2 
     ```
+
+* Visualization will be rendered (if configured) and can be seen in the browser (URL will be shown in the terminal, often [localhost:7000](http://localhost:7000/)).
+
 **3. _Target computer:_ Setup experiments**
 * The experiments are run from the script [ws/src/solver_experiments/solver_experiments/solver_experiments.py](ws/src/solver_experiments/solver_experiments/solver_experiments.py),
 * The experimemts can be configured the following way:
-  - [Line 462](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L462) sets which MPC solvers are included in the tests
-  - [Line 467](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L467) sets which condensed levels are tested for MPC solvers with a sparse interface
-  - [Line 464](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L464) sets which modes are included into the tests for the HPIPM MPC solver
-  - [Line 466](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L466) sets which WBC solvers are included in the tests
-  - [Line 465](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L465) sets which WBC solvers are included in the tests
-  - [Line 458](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L458) sets how often an experiment is repeated until it is considered as 'failed'
+  - [Line 609](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L609) sets which MPC solvers are included in the tests
+  - [Line 619](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L619) sets which condensed levels are tested for MPC solvers with a sparse interface
+  - [Line 616](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L616) sets which modes are included into the tests for the HPIPM MPC solver
+  - [Line 617](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L617) sets which WBC solvers are included in the tests
+  - [Line 617](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L617) sets which WBC scenes/formulations are included in the tests
+  - [Line 641](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L641) sets how often an experiment is repeated until it is considered as 'failed'
 
 **4. _Target computer:_ Run the experiments**
 * Make sure the [ws/src/solver_experiments/results](ws/src/solver_experiments/results) folder is empty and exists.
@@ -139,7 +142,8 @@ Quadrupedal Walking__ follow the following instruction:
     ros2 run solver_experiments solver_experiments      
     ```
 
-    > **Note:** The test script will run all combinations of MPC solvers, WBC solvers, condensing levels, etc. For each combination it first runs the standing and then the trot experiment.
+    > **Note:** The test script will run all experiments (i.e. combinations of MPC solvers, WBC solvers, condensing levels, etc.). For each experiment it first runs the standing and then the trot scenario.
+    If a single experiment fails (*the terminal might show errors etc.*), the script will after a while automatically restart the experiment and mark the old one as failed, it will repeat this as often as specified above.
     
     > **Note:** If the test script is stopped manually or crashes a subprocess (leg driver or controller) might still be running. In that case it is important to manually kill that processes or just **restart the docker container**.
 * Move the [ws/src/solver_experiments/results](ws/src/solver_experiments/results) folder to a new location (another empty folder), the location. The folder should be also renamed with the following pattern, such that it can be later imported into the plotting script: `<target_platform>-N<precition_horizon>-<experiment_name_tag>`
@@ -151,8 +155,10 @@ Quadrupedal Walking__ follow the following instruction:
 
 **5. Generate the plots**
 * Assuming all different experiment result folders (named in the scheme defined above) containing the single experiments have been moved to one empty root folder, the plots can be generated.
-* The jupyter notebook [ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb](ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb) defines at the beginnen in the variable `result_path` the location of that root folder.
+* The jupyter notebook [ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb](ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb) defines at the beginning in the variable `result_path` the location of that root folder.
+    > **Note:** It is recommended to run the python scripts and Jupyter notebook from the docker image as all dependencies are installed there.
 * After the location has been set, run the script and the plots are being generated. This might take a while.
+
 
 
 ## Run the software stack
@@ -184,7 +190,9 @@ Eg. for the MPC controller:
     ```bash
     ros2 launch simulator simulator.launch.py sim:=go2   # or sim:=ulab
     ```
-* All parameters can be set in the `simulator_params.yaml` file. The parameter `visualisation` specifies if the simulator also shows a Meshcat visualisation.
+* All parameters can be set in the `src/simulator/config/simulator_params_*.yaml` file (there is one configuration file per robot). The parameter `visualisation` specifies if the simulator also shows a Meshcat visualisation.
+
+* Visualization will be rendered (if configured) and can be seen in the browser (URL will be shown in the terminal, often [localhost:7000](http://localhost:7000/))
     #### Simulation clock
     The simulator can run faster or slower than realtime. This can be specified via the parameter `simulator_realtime_rate` in the config file.
 A value of 0.0 means that the simulator will run as fast as possible. Note that also for other values (1.0 refers to realtime, 0.5 to half of realtime, 2.0 to double of realtime)
@@ -192,7 +200,8 @@ this is only an upper bound, meaning that the simulator might run slower.
 
 * In order to synchronize the rest of the software stack the simulator publishes the simulation time on the `\clock` topic (following the ROS 2 convention).
 **To synchronize other nodes, instead of following the computer time (in ROS also known as wall time), they have to listen to this clock topic.**
-This can be archived by setting the `use_sim_time` parameter to `True` when launching the respective node. This parameter is automatically set to `True` when launching with the `sim` parameter and to `False` when running with the `real` parameter, but can be overwritten by specifying.
+This can be archived by setting the `use_sim_time` parameter to `True` when launching the respective node. 
+**This parameter is automatically set to correctly when using the provided launch files.**
 
     > **Note on developing nodes that use a timer or follow a clock:** \
     Depending on the `use_sim_time` the call node->get_clock() will return a clock that follows the system's time (wall time)  or the `/clock` topic.
@@ -206,12 +215,18 @@ This can be archived by setting the `use_sim_time` parameter to `True` when laun
 which will reset the simulation and place the robot to a requested pose. This call might take a few seconds.
 The joint positions and PID gains will be set to the original initial value.
 It returns on a successful reset.
+    ```bash
+    ros2 service call /reset_sim interfaces/srv/ResetSimulation "{pose: {position: {z: 0.4}, orientation: {w: 1.0, x: 0, y: 0,  z: 0.0}}, joint_positions: [-0.03287414616578515, 0.7382670992579555, -1.6656333683908857, 0.022376335027853064, 0.7301659339175386, -1.6657410165323536, -0.03343962015375848, 0.7507916433141004, -1.6985474687285194, 0.02383046084651509, 0.7426327340796195, -1.6989789512741746]}"
+    ```
     #### Manual step the simulation
-* Normally the simulation starts and runs with a target frequency as specified by the parameter `simulator_realtime_target`.
-In order to step the simulation manually the parameter `manually_step_sim` has to be set to `true`.
-The simulator then provides a service `/step_sim` of type [ResetSimulation.srv](ws/src/interfaces/srv/StepSimulation.srv)
+* Normally the simulation starts and runs with a target frequency as specified by the parameter `simulator_realtime_rate`.
+In order to step the simulation manually the parameter `manually_step_sim` in the simulator's config file has to be set to `true`.
+The simulator then provides a service `/step_sim` of type [StepSimulation.srv](ws/src/interfaces/srv/StepSimulation.srv)
 which will advance the simulation by the amount of seconds specified in the request.
+    ```bash
+    ros2 service call /step_sim interfaces/srv/StepSimulation dt:\ 10.0\ 
 
+    ```
 
 ### Running the real Hardware
 > **Disclaimer:** This is research code, this code can destroy your hardware or harm yourself! \
@@ -296,14 +311,14 @@ which will advance the simulation by the amount of seconds specified in the requ
 * Start the state estimation with:
     ```bash
     # select robot with sim:=ulab, sim:=go2, real:=ulab or real:=go2
-    ros2 launch drivers leg_driver_launch.py sim:=go2
+    ros2 launch state_estimation state_estimation.launch.py sim:=go2
     ```
   
 ### Leg driver
 * Start the leg driver with:
     ```bash
     # select robot with sim:=ulab, sim:=go2, real:=ulab or real:=go2
-    ros2 launch state_estimation state_estimation.launch.py sim:=go2
+    ros2 launch drivers leg_driver_launch.py sim:=go2
     ```
 
 ### Dynamic walking controller

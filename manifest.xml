@@ -1,0 +1,29 @@
+<package>
+  <name>dfki-quad</name>
+  <description brief="Quadruped control stack used at DFKI's ULAB">
+    This repo contains the quadruped controller used at DFKI's underactuated lab. It mainly contains a simulation, dynamic walking controller using MPC, WBC and different Gait Sequencers and hardware drivers to be used with different quadrupeds.
+  </description>
+  <author>Shubham Vyas, Rohit Kumar, Franek Stark, Hannah Isermann, Jakob Middelberg, Jonas Haack, Mihaela Popescu, LAsse Shala</author>
+  <maintainer>Franek Stark/franek.stark@dfki.de</maintainer>
+  <license>BSD-3-Clause</license>
+  <url>https://github.com/dfki-ric-underactuated-lab/dfki-quad</url>
+  <logo>https://github.com/dfki-ric-underactuated-lab/dfki-quad/blob/main/header.JPG</logo>
+
+  <keywords>
+    <keyword>control</keyword>
+    <keyword>drivers</keyword>
+    <keyword>communication</keyword>
+    <keyword>simulation</keyword>
+    <keyword>utilities</keyword>
+  </keywords>
+
+  <stage>0</stage>
+  <use>code with papers</use>
+  <activity>active</activity>
+  <classifiers>
+    <classifier>python</classifier>
+    <classifier>c++</classifier>
+    <classifier>ros2</classifier>
+    <classifier>ubuntu</classifier>
+  </classifiers>
+</package>
