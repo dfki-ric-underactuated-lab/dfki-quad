@@ -39,13 +39,6 @@ target_include_directories(
         $<INSTALL_INTERFACE:include>
 )
 
-# Add Python script as executable
-ament_python_install_package(${PROJECT_NAME})
-
-# Add the Python script as an executable
-install(PROGRAMS scripts/kalman_from_imu.py DESTINATION lib/${PROJECT_NAME}
-)
-
 install(TARGETS state_estimation DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME}/)
 
