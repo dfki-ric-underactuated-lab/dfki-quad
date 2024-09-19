@@ -8,11 +8,12 @@ import numpy as np
 import glob
 from pathlib import Path
 
-quad_rep_root = "/home/dfki.uni-bremen.de/fstark/Documents/dfki-quad-ros2"
+from ament_index_python.packages import get_package_share_directory
 
 
 def register_custom_message_types():
-    for path in glob.glob(f"{quad_rep_root}/ws/src/interfaces/msg/*.msg"):
+    interfaces_root = get_package_share_directory("interfaces")
+    for path in glob.glob(f"{interfaces_root}/msg/*.msg"):
         msg_def = Path(path).read_text(encoding="utf-8")
         print(f"register custom message: {msg_def}")
         register_types(get_types_from_msg(msg_def, "interfaces/msg/" + Path(path).stem))

@@ -144,6 +144,7 @@ Quadrupedal Walking__ follow the following instruction:
 
     > **Note:** The test script will run all experiments (i.e. combinations of MPC solvers, WBC solvers, condensing levels, etc.). For each experiment it first runs the standing and then the trot scenario.
     If a single experiment fails (*the terminal might show errors etc.*), the script will after a while automatically restart the experiment and mark the old one as failed, it will repeat this as often as specified above.
+    The full script might take depending on your system at least one hour. Please wait until the script tells you that it is finished.
     
     > **Note:** If the test script is stopped manually or crashes a subprocess (leg driver or controller) might still be running. In that case it is important to manually kill that processes or just **restart the docker container**.
 * Move the [ws/src/solver_experiments/results](ws/src/solver_experiments/results) folder to a new location (another empty folder), the location. The folder should be also renamed with the following pattern, such that it can be later imported into the plotting script: `<target_platform>-N<precition_horizon>-<experiment_name_tag>`
@@ -155,7 +156,11 @@ Quadrupedal Walking__ follow the following instruction:
 
 **5. Generate the plots**
 * Assuming all different experiment result folders (named in the scheme defined above) containing the single experiments have been moved to one empty root folder, the plots can be generated.
-* The jupyter notebook [ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb](ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb) defines at the beginning in the variable `result_path` the location of that root folder.
+* The jupyter notebook [ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb](ws/src/solver_experiments/evaluation_scripts/comparison_paper.ipynb) defines at the beginning in the variable `result_path` the location of that root folder:
+    ```bash
+    sr # shorthand to source the types needed to load the ros bags
+    jupyter notebook --allow-root src/solver_experiments/evaluaion_scripts/comparison_paper.ipynb
+    ```
     > **Note:** It is recommended to run the python scripts and Jupyter notebook from the docker image as all dependencies are installed there.
 * After the location has been set, run the script and the plots are being generated. This might take a while.
 

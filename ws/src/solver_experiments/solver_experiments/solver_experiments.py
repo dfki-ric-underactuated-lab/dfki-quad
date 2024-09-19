@@ -696,7 +696,7 @@ def main(args=None):
     runner.join()
     print("<----- runner stopped")
     solver_experiments_node.destroy_node()
-    print("Bye...")
+    print("All experiments finished! - Bye...")
 
 
 if __name__ == "__main__":

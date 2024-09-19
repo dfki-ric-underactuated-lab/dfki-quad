@@ -1,6 +1,12 @@
 quadprog
-numpy
 cmakelang
-pandas
-rosbags
 typing
+pandas==2.2.2
+rosbags
+matplotlib==3.9.2
+numpy==2.0.0
+jupyter-server==2.14.2
+jupyterlab==4.2.0
+notebook==7.2.2
+plotnine==0.13.6
+ipykernel==6.29.5
