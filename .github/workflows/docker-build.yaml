@@ -1,0 +1,43 @@
+name: CI Multi-Platform Docker Build
+
+# Triggers the workflow on push and pull request events
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Docker Buildx for multi-platform builds
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Step 3: Create a builder instance
+    - name: Create a builder
+      run: docker buildx create --use
+
+    # Step 4: Build Docker images for both x86_64 and ARM with build arguments
+    - name: Build Docker image (multi-platform)
+      run: |
+        docker buildx build \
+          --platform linux/amd64,linux/arm64 \
+          --build-arg HW_ARCH=linux/amd64=x86_64,linux/arm64=aarch64 \
+          -t dfki-quad --load docker/
+
+    # Step 5: Run the build inside the Docker container for x86_64 (Ubuntu)
+    - name: Run build on Ubuntu (x86_64)
+      run: docker run --rm --platform linux/amd64 dfki-quad bash -c "cbg"
+
+    # Step 6: Run the build inside the Docker container for ARM 
+    - name: Run build on ARM 
+      run: docker run --rm --platform linux/arm64 dfki-quad bash -c "cbg_onboard"
