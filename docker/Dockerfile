@@ -17,8 +17,8 @@ RUN apt-get install -y \
     ros-humble-teleop-tools \
     nano \
     vim \
-    libserial-dev
-
+    libserial-dev \
+    msttcorefonts
 
 ARG HW_ARCH
 ARG GO2_NETWORK_INTERFACE
@@ -170,5 +170,3 @@ RUN export ROS_DOMAIN_ID=24
 
 # default workdir
 WORKDIR /root/ros2_ws
-
-
