@@ -26,18 +26,29 @@ jobs:
     - name: Create a builder
       run: docker buildx create --use
 
-    # Step 4: Build Docker images for both x86_64 and ARM with build arguments
-    - name: Build Docker image (multi-platform)
+    # Step 4: Build and load Docker image for x86_64 (Ubuntu) locally
+    - name: Build Docker image for x86_64
       run: |
         docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --build-arg HW_ARCH=linux/amd64=x86_64,linux/arm64=aarch64 \
-          -t dfki-quad --load docker/
+          --platform linux/amd64 \
+          --build-arg HW_ARCH=x86_64 \
+          --output=type=docker \
+          -t dfki-quad-x86_64 docker/
 
-    # Step 5: Run the build inside the Docker container for x86_64 (Ubuntu)
-    - name: Run build on Ubuntu (x86_64)
-      run: docker run --rm --platform linux/amd64 dfki-quad bash -c "cbg"
 
-    # Step 6: Run the build inside the Docker container for ARM 
+    # Step 5: Build and load Docker image for ARM (Raspberry Pi) locally
+    - name: Build Docker image for ARM
+      run: |
+        docker buildx build \
+          --platform linux/arm64 \
+          --build-arg HW_ARCH=aarch64 \
+          --output=type=docker \
+          -t dfki-quad-arm docker/
+
+    # Step 6a: Run the build inside the Docker container for x86_64 
+    - name: Run build on x86_64
+      run: docker run --rm --platform linux/amd64 dfki-quad-x86_64 bash -c "cbg"
+
+    # Step 6b: Run the build inside the Docker container for ARM 
     - name: Run build on ARM 
-      run: docker run --rm --platform linux/arm64 dfki-quad bash -c "cbg_onboard"
+      run: docker run --rm --platform linux/amd64 dfki-quad-arm dfki-quad bash -c "cbg_onboard"
