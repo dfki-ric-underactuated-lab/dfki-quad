@@ -102,7 +102,7 @@ def process_rosbags_in_directory(
                             result_data_out[key].extend(data_len * [tag_data[key]])
 
             except Exception as e:
-                raise e
+                # raise e
                 print(f"!!!!!!FAILURE IN Bag: {e}")
 
 
