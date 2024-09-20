@@ -18,8 +18,8 @@ RUN apt-get install -y \
     nano \
     vim \
     libserial-dev \
-    msttcorefonts
-
+    font-manager
+    
 ARG HW_ARCH
 ARG GO2_NETWORK_INTERFACE
 
