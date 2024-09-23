@@ -32,7 +32,7 @@ jobs:
 
     # Step 5a: Run the build inside the Docker container for x86_64 
     - name: Run build on x86_64
-      run: docker run --rm --platform linux/amd64 dfki-quad-x86_64 bash -c "cbg"
+      run: docker run --rm --platform linux/amd64 --volume="${PWD}/ws/src:/root/ros2_ws/src" dfki-quad-x86_64 bash -c "colcon build --symlink-install --cmake-args -DROBOT_NAME=go2"
 
   build-arm64:
     runs-on: ubuntu-22.04
