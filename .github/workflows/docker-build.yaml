@@ -57,4 +57,5 @@ jobs:
 
     # Step 5b: Run the build inside the Docker container for ARM 
     - name: Run build on ARM 
-      run: docker run --rm --platform linux/arm64 --volume="${PWD}/ws/src:/root/ros2_ws/src" dfki-quad-arm bash -ic "cbg_onboard"
+      run: 
+        docker run --rm --platform linux/arm64 --volume="${PWD}/ws/src:/root/ros2_ws/src" dfki-quad-arm bash -ic "cbg_onboard"
