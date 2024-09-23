@@ -18,8 +18,10 @@ RUN apt-get install -y \
     nano \
     vim \
     libserial-dev \
-    font-manager
-    
+    fontconfig
+
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
+
 ARG HW_ARCH
 ARG GO2_NETWORK_INTERFACE
 

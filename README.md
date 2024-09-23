@@ -130,7 +130,7 @@ Quadrupedal Walking__ follow the following instruction:
   - [Line 619](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L619) sets which condensed levels are tested for MPC solvers with a sparse interface
   - [Line 616](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L616) sets which modes are included into the tests for the HPIPM MPC solver
   - [Line 617](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L617) sets which WBC solvers are included in the tests
-  - [Line 617](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L617) sets which WBC scenes/formulations are included in the tests
+  - [Line 618](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L618) sets which WBC scenes/formulations are included in the tests
   - [Line 641](ws/src/solver_experiments/solver_experiments/solver_experiments.py#L641) sets how often an experiment is repeated until it is considered as 'failed'
 
 **4. _Target computer:_ Run the experiments**
