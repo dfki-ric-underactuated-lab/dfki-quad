@@ -76,7 +76,6 @@ Currently, most scripts support Logitech F310 type gamepads. For other gamepads 
 **3. Building the software stack**
 
 * Inside the container, build the packages and run a simulation by running the following commands.
-Currently the 
 
     > **Note:** The `--symlink-install` option enables you to change *yaml* and *python* files without rebuilding. If you want to use it, you have to use it consistently, as it cannot overwrite compilations without this option. Use `$ rm -r build/ install/ log/` to remove former compilations if you want to compile with this option the first time.
 
@@ -147,7 +146,7 @@ Quadrupedal Walking__ follow the following instruction:
     The full script might take depending on your system at least one hour. Please wait until the script tells you that it is finished.
     
     > **Note:** If the test script is stopped manually or crashes a subprocess (leg driver or controller) might still be running. In that case it is important to manually kill that processes or just **restart the docker container**.
-* Move the [ws/src/solver_experiments/results](ws/src/solver_experiments/results) folder to a new location (another empty folder), the location. The folder should be also renamed with the following pattern, such that it can be later imported into the plotting script: `<target_platform>-N<precition_horizon>-<experiment_name_tag>`
+* Move the [ws/src/solver_experiments/results](ws/src/solver_experiments/results) folder to a new location (another empty folder). The folder should be also renamed with the following pattern, such that it can be later imported into the plotting script: `<target_platform>-N<precition_horizon>-<experiment_name_tag>`
   * `<target_platform>` indicates on which target computer the controller was executed, e.g. `arm_orin`.
   * `<prediciton_horizon>` indicates whith which MPC prediction horizon the experiments were executed, e.g. `10`.
   * `<experiment_name_tag>` is a free field to put some information about the experiments, e.g. if this field contains `wbc` the respective experiments in that folder will later be excluded from any MPC related plot and vice versa.
@@ -179,7 +178,7 @@ Following components have to be launched to run the software stack:
 Please find instructions for all components below.
 > **Note:** Almost all commands in this section need to run in seperate terminals.
 ### Robot selection
-* When running a launch file, the used robot and whether it is on the real system or on hardware has to be specified. 
+* When running a launch file, the used robot and whether it is on the real system or in simulation has to be specified. 
 For this, it is required to set either the parameter `sim` or the parameter `real` to `ulab` for the dfki dog or to `go2` for the unitree.
 For this, you have to append either `sim:=ulab`, `sim:=go2`, `real:=ulab` or `real:=go2` to the launch commands.
 Eg. for the MPC controller:
@@ -203,7 +202,7 @@ Eg. for the MPC controller:
 A value of 0.0 means that the simulator will run as fast as possible. Note that also for other values (1.0 refers to realtime, 0.5 to half of realtime, 2.0 to double of realtime)
 this is only an upper bound, meaning that the simulator might run slower.
 
-* In order to synchronize the rest of the software stack the simulator publishes the simulation time on the `\clock` topic (following the ROS 2 convention).
+* In order to synchronize the rest of the software stack the simulator publishes the simulation time on the ` /clock` topic (following the ROS 2 convention).
 **To synchronize other nodes, instead of following the computer time (in ROS also known as wall time), they have to listen to this clock topic.**
 This can be archived by setting the `use_sim_time` parameter to `True` when launching the respective node. 
 **This parameter is automatically set to correctly when using the provided launch files.**
