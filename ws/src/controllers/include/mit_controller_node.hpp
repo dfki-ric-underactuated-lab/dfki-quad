@@ -81,6 +81,8 @@ class MITController : public rclcpp::Node {
   interfaces::msg::LegCmd leg_cmd_;
   interfaces::msg::JointCmd leg_joint_cmd_;
   interfaces::msg::ControllerInfo controller_heartbeat_;
+  // After a failed WBC solve the joints are damped, a second failure shuts the controller down
+  bool wbc_failed_once_ = false;
 
   rclcpp::TimerBase::SharedPtr mpc_loop_timer_;
   rclcpp::TimerBase::SharedPtr slc_loop_timer_;
@@ -160,6 +162,7 @@ class MITController : public rclcpp::Node {
   void MPCLoopCallback();
   void SLCLoopCallback();
   void ControlLoopCallback();
+  void SetJointDampingCommand();
   void ModelAdaptationCallback();
   void HartbeatCallback();
 };

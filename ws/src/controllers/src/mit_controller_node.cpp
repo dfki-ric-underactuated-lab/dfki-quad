@@ -1306,10 +1306,22 @@ void MITController::ControlLoopCallback() {
       JointTorqueVelocityPositionCommands commands;
       wbc_return =
           reinterpret_cast<WBCInterface<JointTorqueVelocityPositionCommands> *>(wbc_.get())->GetJointCommand(commands);
-      assign(commands.velocity, leg_joint_cmd_.velocity);
-      assign(commands.position, leg_joint_cmd_.position);
-      assign(commands.torque, leg_joint_cmd_.effort);
+      if (wbc_return.success) {
+        assign(commands.velocity, leg_joint_cmd_.velocity);
+        assign(commands.position, leg_joint_cmd_.position);
+        assign(commands.torque, leg_joint_cmd_.effort);
+      } else {
+        SetJointDampingCommand();
+      }
       leg_joint_cmd_publisher_->publish(leg_joint_cmd_);
+      if (!wbc_return.success) {
+        if (wbc_failed_once_) {
+          RCLCPP_FATAL(this->get_logger(), "WBC failed again, the joints are damped");
+          throw std::runtime_error("Shutting down WBC");
+        }
+        RCLCPP_WARN(this->get_logger(), "WBC failed, damping the joints for this cycle");
+        wbc_failed_once_ = true;
+      }
       break;
     }
   }
@@ -1372,6 +1384,16 @@ void MITController::ControlLoopCallback() {
     if (!wbc_return.success) {
       controller_heartbeat_.num_wbc_solver_fail++;
     }
+  }
+}
+
+void MITController::SetJointDampingCommand() {
+  for (unsigned int joint_idx = 0; joint_idx < leg_joint_cmd_.position.size(); joint_idx++) {
+    leg_joint_cmd_.position[joint_idx] = 0.0;
+    leg_joint_cmd_.velocity[joint_idx] = 0.0;
+    leg_joint_cmd_.effort[joint_idx] = 0.0;
+    leg_joint_cmd_.kp[joint_idx] = 0.0;
+    leg_joint_cmd_.kd[joint_idx] = 1.0;
   }
 }
 
