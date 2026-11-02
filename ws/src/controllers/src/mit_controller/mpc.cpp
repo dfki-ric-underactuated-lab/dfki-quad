@@ -119,8 +119,20 @@ void MPC::GetUBounds(const std::array<bool, NUM_FEET> &contact,
       ub_block(1) = fmax;
       ub_block(2) = fmax;
     } else {
-      lb_block.setZero();
-      ub_block.setZero();
+      // Masked away by GetUBoundsMask
+      lb_block.setConstant(NEG_UNBOUND);
+      ub_block.setConstant(POS_UNBOUND);
+    }
+  }
+}
+
+void MPC::GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<inputVecT> u_mask) {
+  for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
+    auto block_mask = u_mask.block<3, 1>(foot * 3, 0);
+    if (contact[foot]) {
+      block_mask.setOnes();
+    } else {
+      block_mask.setZero();
     }
   }
 }
@@ -464,6 +476,11 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("B"), Bs_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulbs_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uubs_[k].data());
+      // remove the input bounds of swing feet from the QP
+      inputVecT u_mask;
+      MPC::GetUBoundsMask(gait_sequence_.contact_sequence[k], u_mask);
+      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu_mask"), u_mask.data());
+      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu_mask"), u_mask.data());
       // remove the friction pyramid rows of swing feet from the QP
       CBoundT c_ub_mask;
       MPC::GetCUpperMask(gait_sequence_.contact_sequence[k], c_ub_mask);
@@ -568,6 +585,13 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
     // Get data
     for (int k = 0; k < PREDICTION_HORIZON; k++) {
       d_ocp_qp_sol_get_u(k, qp_out_, reinterpret_cast<double *>(wrench_sequence.forces[k].data()));
+      // Unbounded swing inputs are only pinned by their weight, first order solvers (OSQP, ProxQP) leave them at their
+      // warm start
+      for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
+        if (!gait_sequence_.contact_sequence[k][foot]) {
+          wrench_sequence.forces[k][foot].setZero();
+        }
+      }
     }
     auto &state_prediction_raw = state_prediction.raw_data;
     for (int k = 0; k <= PREDICTION_HORIZON; k++) {

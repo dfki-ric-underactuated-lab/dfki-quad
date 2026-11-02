@@ -119,6 +119,7 @@ class MPC : public MPCInterface {
                          double fmax,
                          Eigen::Ref<inputVecT> lb,
                          Eigen::Ref<inputVecT> ub);
+  static void GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<inputVecT> u_mask);
 
  public:
   MPC(double alpha,
