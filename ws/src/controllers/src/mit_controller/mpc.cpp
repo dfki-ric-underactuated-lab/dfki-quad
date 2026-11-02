@@ -15,7 +15,6 @@ void MPC::GetA(double psi, double dt, bool update_linearization, Eigen::Ref<AMat
   if (!update_linearization) {
     A.setIdentity();
     A.block<3, 3>(3, 9).diagonal().setConstant(dt);
-    A(11, 12) = -dt;
   }
   MPC::GetR(psi, dt, update_linearization, A.block<3, 3>(0, 6));
 }
@@ -140,7 +139,7 @@ void MPC::GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<i
 }
 
 MPC::MPC(double alpha,
-         const Eigen::Matrix<double, STATE_SIZE - 1, 1> &state_weights,
+         const Eigen::Matrix<double, STATE_SIZE, 1> &state_weights,
          double mu,
          double fmin,
          double fmax,
@@ -202,10 +201,7 @@ MPC::MPC(double alpha,
   // Constants
   MPC::GetC(mu_, D_);
   MPC::GetCbounds(fmin_, fmax_, Clb_, Cub_);
-  Eigen::Matrix<double, STATE_SIZE, 1> state_weights_with_g;
-  state_weights_with_g.setConstant(0);
-  state_weights_with_g.block<STATE_SIZE - 1, 1>(0, 0) = state_weights;
-  Q_ = state_weights_with_g.asDiagonal();
+  Q_ = state_weights.asDiagonal();
   R_ = RMatrixT::Identity() * alpha * force_scale_ * force_scale_;
 
   assert(R_.innerStride() == 1);
@@ -251,6 +247,9 @@ MPC::MPC(double alpha,
   // The friction pyramid rows are one-sided (D u <= 0): masking their lower side removes it from the QP
   // instead of passing NEG_UNBOUND as a finite bound to the QP solver.
   CBoundT c_lb_mask = CBoundT::Zero();
+  // gravity enters the dynamics as their affine term
+  stateVecT b = stateVecT::Zero();
+  b(11) = -GRAVITY_CONSTANT * DeltaT;
   // set the values that won't be changed
   for (int k = 0; k < PREDICTION_HORIZON; k++) {
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("D"), D_.data());
@@ -261,6 +260,7 @@ MPC::MPC(double alpha,
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ug"), Cub_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Jbu"), inputIdentity_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lg_mask"), c_lb_mask.data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("b"), b.data());
   }
   ocp_qp_in_set(solver_config_, qp_in_, PREDICTION_HORIZON, const_cast<char *>("Q"), Q_.data());
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("Jbx"), stateIdentity_.data());
@@ -407,8 +407,8 @@ void MPC::UpdateModel(const ModelInterface &quad_model) {
 
 void MPC::UpdateGaitSequence(const GaitSequence &gait_sequence) { gait_sequence_ = gait_sequence; }
 
-void MPC::SetStateWeights(const Eigen::Matrix<double, STATE_SIZE - 1, 1> &weights) {
-  Q_.diagonal().block<STATE_SIZE - 1, 1>(0, 0) = weights;
+void MPC::SetStateWeights(const Eigen::Matrix<double, STATE_SIZE, 1> &weights) {
+  Q_.diagonal() = weights;
   for (int k = 0; k <= PREDICTION_HORIZON; k++) {
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Q"), Q_.data());
   }
@@ -510,7 +510,6 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
         gait_sequence_.reference_trajectory_twist[k].cross(gait_sequence_.reference_trajectory_orientation[k]
                                                            * base_link_to_com)
         + gait_sequence_.reference_trajectory_velocity[k];
-    target_state(12, 0) = 0;
     qs_[k] = -(Q_ * target_state);
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("q"), qs_[k].data());
 
@@ -518,8 +517,7 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
     std::cout << "Set target x(" << k << ") to: \t[" << target_state(0) << ", " << target_state(1) << ", "
               << target_state(2) << ", " << target_state(3) << ", " << target_state(4) << ", " << target_state(5)
               << ", " << target_state(6) << ", " << target_state(7) << ", " << target_state(8) << ", "
-              << target_state(9) << ", " << target_state(10) << ", " << target_state(11) << ", " << target_state(12)
-              << "]" << std::endl;
+              << target_state(9) << ", " << target_state(10) << ", " << target_state(11) << "]" << std::endl;
 #endif
   }
   // Set current state:
@@ -529,14 +527,13 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
   x0_.block<3, 1>(9, 0) =
       quad_state_->GetAngularVelInWorld().cross(quad_state_->GetOrientationInWorld() * base_link_to_com)
       + quad_state_->GetLinearVelInWorld();
-  x0_(12) = GRAVITY_CONSTANT;
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("lbx"), x0_.data());
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("ubx"), x0_.data());
 
 #ifdef DEBUG_PRINTS
   std::cout << "Set x0 to: \t[" << x0_(0) << ", " << x0_(1) << ", " << x0_(2) << ", " << x0_(3) << ", " << x0_(4)
             << ", " << x0_(5) << ", " << x0_(6) << ", " << x0_(7) << ", " << x0_(8) << ", " << x0_(9) << ", " << x0_(10)
-            << ", " << x0_(11) << ", " << x0_(12) << "]" << std::endl;
+            << ", " << x0_(11) << "]" << std::endl;
 #endif
 
   // print_ocp_qp_in(qp_in_);

@@ -294,7 +294,7 @@ int main() {
       }
       for (unsigned int k = 0; k <= MPC_PREDICTION_HORIZON; k++) {
         std::cout << " \t [";
-        for (unsigned int state_id = 0; state_id < 13; state_id++) {
+        for (unsigned int state_id = 0; state_id < MPC::STATE_SIZE; state_id++) {
           std::cout << std::fixed << std::setprecision(4) << prediction.raw_data[k](state_id) << ", \t\t";
         }
         std::cout << "]" << std::endl;

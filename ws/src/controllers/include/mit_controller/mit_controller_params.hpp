@@ -10,6 +10,8 @@
 static constexpr int N_LEGS = 4;
 static constexpr int N_JOINTS_PER_LEG = 3;
 static constexpr int GAIT_SEQUENCE_SIZE = 100;
+// rpy, CoM position, angular velocity, CoM velocity (gravity enters the dynamics as their affine term)
+static constexpr int MPC_STATE_SIZE = 12;
 static constexpr int MPC_PREDICTION_HORIZON = DFKI_QUAD_MPC_HORIZON;
 static_assert(MPC_PREDICTION_HORIZON >= 1, "DFKI_QUAD_MPC_HORIZON must be at least 1");
 static_assert(MPC_PREDICTION_HORIZON + 1 <= GAIT_SEQUENCE_SIZE, "the gait sequence must cover the MPC horizon");

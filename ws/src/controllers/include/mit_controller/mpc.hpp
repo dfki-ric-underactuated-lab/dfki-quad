@@ -12,7 +12,7 @@
 
 class MPC : public MPCInterface {
  public:
-  static constexpr int STATE_SIZE = 13;
+  static constexpr int STATE_SIZE = MPC_STATE_SIZE;
   static constexpr int NUM_FEET = N_LEGS;
   static constexpr int INPUT_SIZE = 3 * NUM_FEET;
   static constexpr int PREDICTION_HORIZON = MPC_PREDICTION_HORIZON;
@@ -127,7 +127,7 @@ class MPC : public MPCInterface {
 
  public:
   MPC(double alpha,
-      const Eigen::Matrix<double, STATE_SIZE - 1, 1> &state_weights,
+      const Eigen::Matrix<double, STATE_SIZE, 1> &state_weights,
       double mu,
       double fmin,
       double fmax,
@@ -157,7 +157,7 @@ class MPC : public MPCInterface {
                          MPCPrediction &state_prediction,
                          SolverInformation &solver_information) override;
 
-  void SetStateWeights(const Eigen::Matrix<double, STATE_SIZE - 1, 1> &weights);
+  void SetStateWeights(const Eigen::Matrix<double, STATE_SIZE, 1> &weights);
   void SetInputWeights(double alpha);
   void SetFmax(double fmax);
   void SetMu(double mu);

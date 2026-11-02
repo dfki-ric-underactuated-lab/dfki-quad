@@ -69,8 +69,8 @@ class MITController : public rclcpp::Node {
   bool lost_contact_detection_;
   bool late_contact_reschedule_swing_phase_;
   bool use_model_adaptation_;
-  Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1> state_weights_stand_;
-  Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1> state_weights_move_;
+  Eigen::Matrix<double, MPC::STATE_SIZE, 1> state_weights_stand_;
+  Eigen::Matrix<double, MPC::STATE_SIZE, 1> state_weights_move_;
 
   // ROS related members
   rclcpp::Subscription<interfaces::msg::QuadState>::SharedPtr quad_state_subscription_;

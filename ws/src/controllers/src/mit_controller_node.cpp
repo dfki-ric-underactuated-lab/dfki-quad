@@ -307,7 +307,7 @@ MITController::MITController(const std::string &nodeName)
         rcl_interfaces::msg::SetParametersResult res;
         for (auto &param : params) {
           if (param.get_name().find("mpc_state_weights") != std::string::npos
-              and param.as_double_array().size() != (MPC::STATE_SIZE - 1)) {
+              and param.as_double_array().size() != (MPC::STATE_SIZE)) {
             res.successful = false;
             res.reason = "MPC state weight vector has wrong size";
             return res;
@@ -392,7 +392,7 @@ MITController::MITController(const std::string &nodeName)
         RCLCPP_INFO(this->get_logger(), "Updating mpc state weights stand");
         mpc_lock_.lock();
         state_weights_stand_ =
-            Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1>>(param.value.double_array_value.data());
+            Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE, 1>>(param.value.double_array_value.data());
         if (last_gait_sequence_mode_ == GaitSequence::KEEP) {
           reinterpret_cast<MPC *>(mpc_.get())->SetStateWeights(state_weights_stand_);
         }
@@ -401,7 +401,7 @@ MITController::MITController(const std::string &nodeName)
         RCLCPP_INFO(this->get_logger(), "Updating mpc state weights move");
         mpc_lock_.lock();
         state_weights_move_ =
-            Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1>>(param.value.double_array_value.data());
+            Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE, 1>>(param.value.double_array_value.data());
         if (last_gait_sequence_mode_ == GaitSequence::MOVE) {
           reinterpret_cast<MPC *>(mpc_.get())->SetStateWeights(state_weights_move_);
         }
@@ -527,11 +527,11 @@ MITController::MITController(const std::string &nodeName)
   });
 
   // Control parts
-  assert(this->get_parameter("mpc_state_weights_stand").as_double_array().size() == (MPC::STATE_SIZE - 1));
-  assert(this->get_parameter("mpc_state_weights_move").as_double_array().size() == (MPC::STATE_SIZE - 1));
-  state_weights_stand_ = Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1>>(
+  assert(this->get_parameter("mpc_state_weights_stand").as_double_array().size() == (MPC::STATE_SIZE));
+  assert(this->get_parameter("mpc_state_weights_move").as_double_array().size() == (MPC::STATE_SIZE));
+  state_weights_stand_ = Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE, 1>>(
       this->get_parameter("mpc_state_weights_stand").as_double_array().data());
-  state_weights_move_ = Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE - 1, 1>>(
+  state_weights_move_ = Eigen::Map<const Eigen::Matrix<double, MPC::STATE_SIZE, 1>>(
       this->get_parameter("mpc_state_weights_move").as_double_array().data());
 
   while (!first_quad_state_received_) {
