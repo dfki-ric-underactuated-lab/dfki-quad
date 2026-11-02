@@ -334,6 +334,13 @@ MPC::MPC(double alpha,
   // Set all tolerances
   if (solver_tolerances > 0.0) {
     for (auto tol_name : {"tol_dual_gap", "tol_eq", "tol_stat", "tol_ineq", "tol_comp"}) {
+#ifdef ACADOS_WITH_PROXQP
+      if ((solver == PARTIAL_CONDENSING_PROXQP || solver == FULL_CONDENSING_PROXQP)
+          && std::string(tol_name) == "tol_dual_gap") {
+        std::cout << "Skip tolerance " << tol_name << ", not interfaced by ProxQP" << std::endl;
+        continue;
+      }
+#endif
       std::cout << "Set tolerance " << tol_name << " to " << solver_tolerances << std::endl;
       ocp_qp_xcond_solver_opts_set(
           solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), tol_name, &solver_tolerances);
