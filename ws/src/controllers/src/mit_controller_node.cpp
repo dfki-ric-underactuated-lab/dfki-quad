@@ -726,7 +726,8 @@ MITController::MITController(const std::string &nodeName)
   quad_control_target_subscription_ = this->create_subscription<interfaces::msg::QuadControlTarget>(
       "quad_control_target",
       QOS_RELIABLE_NO_DEPTH,
-      std::bind(&MITController::QuadControlTargetUpdateCallback, this, std::placeholders::_1));
+      std::bind(&MITController::QuadControlTargetUpdateCallback, this, std::placeholders::_1),
+      quad_control_target_subscription_opts);
 
   mpc_loop_timer_ = rclcpp::create_timer(this,
                                          this->get_clock(),
@@ -873,7 +874,6 @@ void MITController::QuadControlTargetUpdateCallback(interfaces::msg::QuadControl
   target_.wz = quad_target_msg->hybrid_theta_dot;
   target_.roll = quad_target_msg->roll;
   target_.pitch = quad_target_msg->pitch;
-  // TODO: this is maybe a race condition
 }
 
 void MITController::MPCLoopCallback() {
@@ -890,7 +890,6 @@ void MITController::MPCLoopCallback() {
   gs_->UpdateTarget(target_);
   gs_->UpdateState(quad_state_temp);
   mpc_->UpdateState(quad_state_temp);
-  slc_->UpdateState(quad_state_temp);
   gs_->GetGaitSequence(gait_sequence_temp);
   mpc_->UpdateGaitSequence(gait_sequence_temp);
 
@@ -1275,8 +1274,8 @@ void MITController::ControlLoopCallback() {
         gait[leg_idx] = false;
         feet_targets.velocities[leg_idx].setZero();
         feet_targets.accelerations[leg_idx].setZero();
-        feet_targets.positions[leg_idx] = Eigen::Translation3d(quad_state_.GetPositionInWorld())
-                                          * quad_state_.GetOrientationInWorld()
+        feet_targets.positions[leg_idx] = Eigen::Translation3d(quad_state_temp.GetPositionInWorld())
+                                          * quad_state_temp.GetOrientationInWorld()
                                           * slip_hold_in_body_[leg_idx];  // Transformed to world
         wrenches[leg_idx].setZero();
       } break;
@@ -1444,20 +1443,22 @@ void MITController::SLCLoopCallback() {
   static std::array<SwingLegControllerInterface::LegState, ModelInterface::N_LEGS> feet_swing_states_temp;
   static FeetTargets feet_targets_temp;
   slc_lock_.lock();
+  quad_state_lock_.lock();
+  quad_state_temp = quad_state_;
+  quad_state_lock_.unlock();
+  // the state first, so that a new gait sequence is applied with the current state
+  slc_->UpdateState(quad_state_temp);
+
   gs_wrench_sequence_lock_.lock();
   if (gs_updated_) {
     gs_tmp = gait_sequence_;
+    gs_updated_ = false;
     gs_wrench_sequence_lock_.unlock();
     slc_->UpdateGaitSequence(gs_tmp);
   } else {
     gs_wrench_sequence_lock_.unlock();
   }
 
-  quad_state_lock_.lock();
-  quad_state_temp = quad_state_;
-  quad_state_lock_.unlock();
-
-  slc_->UpdateState(quad_state_temp);
   slc_->GetFeetTargets(feet_targets_temp);
   slc_->GetProgress(feet_swing_progress_temp, feet_swing_states_temp);
 

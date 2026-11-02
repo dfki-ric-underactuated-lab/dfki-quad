@@ -120,7 +120,7 @@ class MITController : public rclcpp::Node {
   std::unique_ptr<ModelAdaptationInterface> ma_;
   Target target_;
   GaitSequence gait_sequence_;
-  bool gs_updated_;
+  bool gs_updated_ = false;
   WrenchSequence wrench_sequence_;
   MPCPrediction mpc_prediction_;
   FeetTargets feet_targets_;
