@@ -93,7 +93,7 @@ void MPCTrajectoryPlanner::plan_trajectory(GaitSequence& sequence, const Target&
       if (target.active.hybrid_y_dot) {
         hybrid_velocity(1) = target.hybrid_y_dot;
       }
-      velocity = orientation * hybrid_velocity;
+      velocity = yaw_quaternion_from_quaternion<double>(orientation) * hybrid_velocity;
       // position update with velocity in direction between current and last yaw
       // orientation
       position += yaw_quaternion_from_quaternion<double>(sequence.reference_trajectory_orientation[i - 1])
@@ -323,7 +323,7 @@ void MPCTrajectoryPlanner::set_current_target(GaitSequence& sequence, const Targ
     if (target.active.hybrid_y_dot) {
       hybrid_velocity(1) = target.hybrid_y_dot;
     }
-    velocity = orientation * hybrid_velocity;
+    velocity = yaw_quaternion_from_quaternion<double>(orientation) * hybrid_velocity;
   } else {
     // velocities in world frame (lower priority than hybrid frame)
     if (target.active.x_dot) {
