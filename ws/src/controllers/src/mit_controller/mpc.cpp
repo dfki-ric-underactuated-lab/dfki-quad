@@ -423,13 +423,17 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
     if (k < PREDICTION_HORIZON) {  // Input related stuff is only up to PREDICITION HORIZON - 1
       std::array<const Eigen::Ref<const Eigen::Vector3d>, 4> rs{
           gait_sequence_.foot_position_sequence[k][0]
-              - (gait_sequence_.desired_reference_trajectory_position[k] + base_link_to_com),
+              - (gait_sequence_.desired_reference_trajectory_position[k]
+                 + gait_sequence_.desired_reference_trajectory_orientation[k] * base_link_to_com),
           gait_sequence_.foot_position_sequence[k][1]
-              - (gait_sequence_.desired_reference_trajectory_position[k] + base_link_to_com),
+              - (gait_sequence_.desired_reference_trajectory_position[k]
+                 + gait_sequence_.desired_reference_trajectory_orientation[k] * base_link_to_com),
           gait_sequence_.foot_position_sequence[k][2]
-              - (gait_sequence_.desired_reference_trajectory_position[k] + base_link_to_com),
+              - (gait_sequence_.desired_reference_trajectory_position[k]
+                 + gait_sequence_.desired_reference_trajectory_orientation[k] * base_link_to_com),
           gait_sequence_.foot_position_sequence[k][3]
-              - (gait_sequence_.desired_reference_trajectory_position[k] + base_link_to_com)};
+              - (gait_sequence_.desired_reference_trajectory_position[k]
+                 + gait_sequence_.desired_reference_trajectory_orientation[k] * base_link_to_com)};
       MPC::GetA(psi_avg, DeltaT, true, As_[k]);
       MPC::GetB(desired_yaw,
                 quad_model_->GetMass(),
@@ -451,9 +455,13 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
     target_state.block<3, 1>(0, 0) =
         quaternion_to_euler(gait_sequence_.desired_reference_trajectory_orientation[k]);  // TODO: right conversion?
     target_state(2) = desired_yaw;
-    target_state.block<3, 1>(3, 0) = gait_sequence_.desired_reference_trajectory_position[k] + base_link_to_com;
+    target_state.block<3, 1>(3, 0) = gait_sequence_.desired_reference_trajectory_position[k]
+                                     + gait_sequence_.desired_reference_trajectory_orientation[k] * base_link_to_com;
     target_state.block<3, 1>(6, 0) = gait_sequence_.reference_trajectory_twist[k];
-    target_state.block<3, 1>(9, 0) = gait_sequence_.reference_trajectory_velocity[k];
+    target_state.block<3, 1>(9, 0) =
+        gait_sequence_.reference_trajectory_twist[k].cross(gait_sequence_.reference_trajectory_orientation[k]
+                                                           * base_link_to_com)
+        + gait_sequence_.reference_trajectory_velocity[k];
     target_state(12, 0) = 0;
     qs_[k] = -(Q_ * target_state);
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("q"), qs_[k].data());
@@ -468,9 +476,11 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
   }
   // Set current state:
   x0_.block<3, 1>(0, 0) = quaternion_to_euler(quad_state_->GetOrientationInWorld());
-  x0_.block<3, 1>(3, 0) = quad_state_->GetPositionInWorld() + base_link_to_com;
+  x0_.block<3, 1>(3, 0) = quad_state_->GetPositionInWorld() + quad_state_->GetOrientationInWorld() * base_link_to_com;
   x0_.block<3, 1>(6, 0) = quad_state_->GetAngularVelInWorld();
-  x0_.block<3, 1>(9, 0) = quad_state_->GetLinearVelInWorld();
+  x0_.block<3, 1>(9, 0) =
+      quad_state_->GetAngularVelInWorld().cross(quad_state_->GetOrientationInWorld() * base_link_to_com)
+      + quad_state_->GetLinearVelInWorld();
   x0_(12) = GRAVITY_CONSTANT;
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("lbx"), x0_.data());
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("ubx"), x0_.data());
@@ -539,9 +549,9 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
     for (int k = 0; k <= PREDICTION_HORIZON; k++) {
       d_ocp_qp_sol_get_x(k, qp_out_, state_prediction_raw[k].data());
       state_prediction.orientation[k] = euler_to_quaternion<double>(state_prediction_raw[k].block<3, 1>(0, 0));
-      state_prediction.position[k] = state_prediction_raw[k].block<3, 1>(3, 0) - base_link_to_com;
+      state_prediction.position[k] = state_prediction_raw[k].block<3, 1>(3, 0) - (state_prediction.orientation[k] * base_link_to_com);
       state_prediction.angular_velocity[k] = state_prediction_raw[k].block<3, 1>(6, 0);
-      state_prediction.linear_velocity[k] = state_prediction_raw[k].block<3, 1>(9, 0);
+      state_prediction.linear_velocity[k] =(state_prediction.orientation[k] * base_link_to_com).cross(state_prediction.angular_velocity[k]) + state_prediction_raw[k].block<3, 1>(9, 0);
     }
     // Get objective value
     solver_information.qp_objective_value = 0.0;
