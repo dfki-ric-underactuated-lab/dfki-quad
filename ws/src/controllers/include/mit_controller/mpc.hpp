@@ -34,6 +34,8 @@ class MPC : public MPCInterface {
   double fmax_;
   double mu_;
   bool flush_denormals_;
+  // The QP inputs are the forces divided by this scale (see scale_inputs)
+  double force_scale_;
 
   // This typedefs automatically enforce the correct storage order to be used as raw pointers for acados
   // (see: https://discourse.acados.org/t/storage-order-of-c-interface/1379/3)
@@ -102,6 +104,7 @@ class MPC : public MPCInterface {
                    const std::array<bool, NUM_FEET> &contacts,
                    double dt,
                    bool update_linearization,
+                   double force_scale,
                    Eigen::Ref<BMatrixT> B);
   static void GetR(double psi, double multiply_with, bool update_linearization, Eigen::Ref<Eigen::Matrix3d> R);
   static void GetIWorld(double psi,
@@ -117,6 +120,7 @@ class MPC : public MPCInterface {
   static void GetUBounds(const std::array<bool, NUM_FEET> &contact,
                          double fmin,
                          double fmax,
+                         double force_scale,
                          Eigen::Ref<inputVecT> lb,
                          Eigen::Ref<inputVecT> ub);
   static void GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<inputVecT> u_mask);
@@ -140,7 +144,8 @@ class MPC : public MPCInterface {
       bool clarabel_equilibrate,
       double clarabel_max_step_fraction,
       bool x0_as_equality,
-      bool flush_denormals
+      bool flush_denormals,
+      bool scale_inputs
     );
 
   void UpdateState(const StateInterface &quad_state) override;

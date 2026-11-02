@@ -55,6 +55,7 @@ int main() {
           true,
           0.99,
           false,
+          true,
           true);
 
   // GaitSequencer

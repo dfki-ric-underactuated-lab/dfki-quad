@@ -93,6 +93,9 @@ MITController::MITController(const std::string &nodeName)
   // Flush subnormal floating-point numbers to zero while the QP solvers run (FTZ/DAZ on x86, FZ on ARM). Warm-started
   // first-order solvers accumulate them and x86 computes with them on a slow path.
   this->declare_parameter<bool>("mpc_flush_denormals", true);
+  // Let the QP solver optimise the forces in units of the robot weight (m * g) instead of N. Same solution, but a
+  // better conditioned QP (HPIPM does not scale the problem itself). mpc_alpha, mpc_fmin and mpc_fmax stay in N.
+  this->declare_parameter<bool>("mpc_scale_inputs", true);
   this->declare_parameter<bool>("wbc.arc_opt.flush_denormals", true);
   // <= 0 keeps the wbc solver's defaults
   this->declare_parameter<double>("wbc_solver_tolerances", -1.0);
@@ -605,7 +608,8 @@ MITController::MITController(const std::string &nodeName)
                                this->get_parameter("mpc_clarabel_equilibrate").as_bool(),
                                this->get_parameter("mpc_clarabel_max_step_fraction").as_double(),
                                this->get_parameter("mpc_x0_as_equality").as_bool(),
-                               this->get_parameter("mpc_flush_denormals").as_bool());
+                               this->get_parameter("mpc_flush_denormals").as_bool(),
+                               this->get_parameter("mpc_scale_inputs").as_bool());
 
   gs_->UpdateTarget(target_);
   Eigen::Vector<double, ModelAdaptationInterface::NUM_PARAMS> conv_thresh =

@@ -27,6 +27,7 @@ void MPC::GetB(double psi,
                const std::array<bool, NUM_FEET> &contacts,
                double dt,
                bool update_linearization,
+               double force_scale,
                Eigen::Ref<BMatrixT> B) {
   if (!update_linearization) {
     B.setZero();
@@ -36,8 +37,8 @@ void MPC::GetB(double psi,
   Eigen::Matrix3d I_rot_inv = I_rot.inverse();
   for (unsigned int foot_indx = 0; foot_indx < NUM_FEET; foot_indx++) {
     if (contacts[foot_indx]) {
-      B.block<3, 3>(6, foot_indx * 3) = I_rot_inv * skew(r[foot_indx]) * dt;
-      B.block<3, 3>(9, foot_indx * 3).diagonal().setConstant(dt / m);
+      B.block<3, 3>(6, foot_indx * 3) = I_rot_inv * skew(r[foot_indx]) * dt * force_scale;
+      B.block<3, 3>(9, foot_indx * 3).diagonal().setConstant(dt / m * force_scale);
     } else {
       // A swing foot transmits no force
       B.block<3, 3>(6, foot_indx * 3).setZero();
@@ -105,6 +106,7 @@ void MPC::GetCUpperMask(const std::array<bool, NUM_FEET> &contact,
 void MPC::GetUBounds(const std::array<bool, NUM_FEET> &contact,
                      double fmin,
                      double fmax,
+                     double force_scale,
                      Eigen::Ref<inputVecT> lb,
                      Eigen::Ref<inputVecT> ub) {
   // TODO: maybe dont use this redundant bb constraints
@@ -112,12 +114,12 @@ void MPC::GetUBounds(const std::array<bool, NUM_FEET> &contact,
     auto lb_block = lb.block<3, 1>(feet_idx * 3, 0);
     auto ub_block = ub.block<3, 1>(feet_idx * 3, 0);
     if (contact[feet_idx]) {
-      lb_block(0) = -fmax;
-      lb_block(1) = -fmax;
-      lb_block(2) = fmin;
-      ub_block(0) = fmax;
-      ub_block(1) = fmax;
-      ub_block(2) = fmax;
+      lb_block(0) = -fmax / force_scale;
+      lb_block(1) = -fmax / force_scale;
+      lb_block(2) = fmin / force_scale;
+      ub_block(0) = fmax / force_scale;
+      ub_block(1) = fmax / force_scale;
+      ub_block(2) = fmax / force_scale;
     } else {
       // Masked away by GetUBoundsMask
       lb_block.setConstant(NEG_UNBOUND);
@@ -155,7 +157,8 @@ MPC::MPC(double alpha,
          bool clarabel_equilibrate,
          double clarabel_max_step_fraction,
          bool x0_as_equality,
-         bool flush_denormals)
+         bool flush_denormals,
+         bool scale_inputs)
     : quad_model_(std::move(quad_model)),
       model_update_(false),
       quad_state_(std::move(quad_state)),
@@ -163,10 +166,17 @@ MPC::MPC(double alpha,
       fmax_(fmax),
       mu_(mu),
       flush_denormals_(flush_denormals),
+      force_scale_(1.0),
       stateOnes_(stateVecT::Ones()),
       inputOnes_(inputVecT::Ones()),
       stateIdentity_(AMatrixT::Identity()),
       inputIdentity_(RMatrixT::Identity()) {
+  // Forces in units of the robot weight (HPIPM does not scale the QP itself). Fixed at construction, model adaptation
+  // only changes the dynamics.
+  if (scale_inputs) {
+    force_scale_ = quad_model_->GetMass() * GRAVITY_CONSTANT;
+  }
+  std::cout << "Input scaling: forces " << force_scale_ << std::endl;
   // Initial creation of matrices with placeholder for yaw and foot positions
   Eigen::Vector3d zero_pos;
   zero_pos.setZero();
@@ -181,6 +191,7 @@ MPC::MPC(double alpha,
               {false, false, false, false},
               DeltaT,
               false,
+              force_scale_,
               Bs_[k]);
     // This cheks are important to later pass the pointer to the acados calls
     assert(As_[k].innerStride() == 1);
@@ -195,7 +206,7 @@ MPC::MPC(double alpha,
   state_weights_with_g.setConstant(0);
   state_weights_with_g.block<STATE_SIZE - 1, 1>(0, 0) = state_weights;
   Q_ = state_weights_with_g.asDiagonal();
-  R_ = RMatrixT::Identity() * alpha;
+  R_ = RMatrixT::Identity() * alpha * force_scale_ * force_scale_;
 
   assert(R_.innerStride() == 1);
   assert(R_.outerStride() == INPUT_SIZE);
@@ -405,7 +416,7 @@ void MPC::SetStateWeights(const Eigen::Matrix<double, STATE_SIZE - 1, 1> &weight
 }
 
 void MPC::SetInputWeights(double alpha) {
-  R_ = RMatrixT::Identity() * alpha;
+  R_ = RMatrixT::Identity() * alpha * force_scale_ * force_scale_;
   for (int k = 0; k < PREDICTION_HORIZON; k++) {
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("R"), R_.data());
   }
@@ -415,7 +426,7 @@ void MPC::SetInputWeights(double alpha) {
 void MPC::SetFmax(double fmax) {
   fmax_ = fmax;
   for (int k = 0; k < PREDICTION_HORIZON; k++) {
-    MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, ulbs_[k], uubs_[k]);
+    MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, force_scale_, ulbs_[k], uubs_[k]);
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulbs_[k].data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uubs_[k].data());
   }
@@ -469,8 +480,9 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
                 gait_sequence_.contact_sequence[k],
                 DeltaT,
                 !model_update_,
+                force_scale_,
                 Bs_[k]);
-      MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, ulbs_[k], uubs_[k]);
+      MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, force_scale_, ulbs_[k], uubs_[k]);
       // TODO: clarify if this is nececarry or could be done once in constructor
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("A"), As_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("B"), Bs_[k].data());
@@ -588,7 +600,9 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
       // Unbounded swing inputs are only pinned by their weight, first order solvers (OSQP, ProxQP) leave them at their
       // warm start
       for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
-        if (!gait_sequence_.contact_sequence[k][foot]) {
+        if (gait_sequence_.contact_sequence[k][foot]) {
+          wrench_sequence.forces[k][foot] *= force_scale_;
+        } else {
           wrench_sequence.forces[k][foot].setZero();
         }
       }
