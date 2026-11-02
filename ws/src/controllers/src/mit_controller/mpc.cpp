@@ -102,39 +102,19 @@ void MPC::GetCUpperMask(const std::array<bool, NUM_FEET> &contact,
   }
 }
 
-void MPC::GetUBounds(const std::array<bool, NUM_FEET> &contact,
-                     double fmin,
-                     double fmax,
-                     double force_scale,
-                     Eigen::Ref<inputVecT> lb,
-                     Eigen::Ref<inputVecT> ub) {
-  // TODO: maybe dont use this redundant bb constraints
-  for (unsigned int feet_idx = 0; feet_idx < NUM_FEET; feet_idx++) {
-    auto lb_block = lb.block<3, 1>(feet_idx * 3, 0);
-    auto ub_block = ub.block<3, 1>(feet_idx * 3, 0);
-    if (contact[feet_idx]) {
-      lb_block(0) = -fmax / force_scale;
-      lb_block(1) = -fmax / force_scale;
-      lb_block(2) = fmin / force_scale;
-      ub_block(0) = fmax / force_scale;
-      ub_block(1) = fmax / force_scale;
-      ub_block(2) = fmax / force_scale;
-    } else {
-      // Masked away by GetUBoundsMask
-      lb_block.setConstant(NEG_UNBOUND);
-      ub_block.setConstant(POS_UNBOUND);
-    }
-  }
+void MPC::GetUBounds(double fmin, double fmax, double force_scale, Eigen::Ref<uBoundVecT> lb, Eigen::Ref<uBoundVecT> ub) {
+  lb.setConstant(fmin / force_scale);
+  ub.setConstant(fmax / force_scale);
 }
 
-void MPC::GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<inputVecT> u_mask) {
+void MPC::GetUBoundsMask(const std::array<bool, NUM_FEET> &contact,
+                         double fmin,
+                         Eigen::Ref<uBoundVecT> lb_mask,
+                         Eigen::Ref<uBoundVecT> ub_mask) {
   for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
-    auto block_mask = u_mask.block<3, 1>(foot * 3, 0);
-    if (contact[foot]) {
-      block_mask.setOnes();
-    } else {
-      block_mask.setZero();
-    }
+    ub_mask(foot) = static_cast<double>(contact[foot]);
+    // f_z >= 0 already follows from the friction pyramid
+    lb_mask(foot) = static_cast<double>(contact[foot] && fmin > 0.0);
   }
 }
 
@@ -168,8 +148,7 @@ MPC::MPC(double alpha,
       force_scale_(1.0),
       stateOnes_(stateVecT::Ones()),
       inputOnes_(inputVecT::Ones()),
-      stateIdentity_(AMatrixT::Identity()),
-      inputIdentity_(RMatrixT::Identity()) {
+      stateIdentity_(AMatrixT::Identity()) {
   // Forces in units of the robot weight (HPIPM does not scale the QP itself). Fixed at construction, model adaptation
   // only changes the dynamics.
   if (scale_inputs) {
@@ -203,6 +182,13 @@ MPC::MPC(double alpha,
   MPC::GetCbounds(fmin_, fmax_, Clb_, Cub_);
   Q_ = state_weights.asDiagonal();
   R_ = RMatrixT::Identity() * alpha * force_scale_ * force_scale_;
+  // Only f_z is bounded, the friction pyramid bounds f_x and f_y by f_z
+  assert(mu_ < 1.0);
+  Jbu_.setZero();
+  for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
+    Jbu_(foot, foot * 3 + 2) = 1.0;
+  }
+  MPC::GetUBounds(fmin_, fmax_, force_scale_, ulb_, uub_);
 
   assert(R_.innerStride() == 1);
   assert(R_.outerStride() == INPUT_SIZE);
@@ -218,7 +204,7 @@ MPC::MPC(double alpha,
   int nx = STATE_SIZE;  // This is necessary in order to not lose const qualifiers
   int nu = INPUT_SIZE;  // TODO: do they have to be in object?
   int ncb = NUM_POLY_CONST_PER_FOOT * NUM_FEET;
-  int nbu = NUM_FEET * 3;  // Limit all forces
+  int nbu = NUM_FEET;
   int zero = 0;
   // inital value constraint for x
   ocp_qp_dims_set(solver_config_, ocp_dims_, 0, "nbx", &nx);
@@ -258,7 +244,9 @@ MPC::MPC(double alpha,
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Q"), Q_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lg"), Clb_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ug"), Cub_.data());
-    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Jbu"), inputIdentity_.data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Jbu"), Jbu_.data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulb_.data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uub_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lg_mask"), c_lb_mask.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("b"), b.data());
   }
@@ -425,10 +413,9 @@ void MPC::SetInputWeights(double alpha) {
 
 void MPC::SetFmax(double fmax) {
   fmax_ = fmax;
+  MPC::GetUBounds(fmin_, fmax_, force_scale_, ulb_, uub_);
   for (int k = 0; k < PREDICTION_HORIZON; k++) {
-    MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, force_scale_, ulbs_[k], uubs_[k]);
-    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulbs_[k].data());
-    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uubs_[k].data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uub_.data());
   }
   std::cout << "Updated fmax to: " << fmax_ << std::endl;
 }
@@ -482,17 +469,15 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
                 !model_update_,
                 force_scale_,
                 Bs_[k]);
-      MPC::GetUBounds(gait_sequence_.contact_sequence[k], fmin_, fmax_, force_scale_, ulbs_[k], uubs_[k]);
       // TODO: clarify if this is nececarry or could be done once in constructor
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("A"), As_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("B"), Bs_[k].data());
-      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulbs_[k].data());
-      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uubs_[k].data());
       // remove the input bounds of swing feet from the QP
-      inputVecT u_mask;
-      MPC::GetUBoundsMask(gait_sequence_.contact_sequence[k], u_mask);
-      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu_mask"), u_mask.data());
-      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu_mask"), u_mask.data());
+      uBoundVecT lbu_mask;
+      uBoundVecT ubu_mask;
+      MPC::GetUBoundsMask(gait_sequence_.contact_sequence[k], fmin_, lbu_mask, ubu_mask);
+      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu_mask"), lbu_mask.data());
+      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu_mask"), ubu_mask.data());
       // remove the friction pyramid rows of swing feet from the QP
       CBoundT c_ub_mask;
       MPC::GetCUpperMask(gait_sequence_.contact_sequence[k], c_ub_mask);

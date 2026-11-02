@@ -315,6 +315,10 @@ MITController::MITController(const std::string &nodeName)
             res.successful = false;
             res.reason = "mpc_alpha must be positive, it holds the forces of swing feet at zero";
             return res;
+          } else if (param.get_name() == "mpc_mu" and param.as_double() >= 1.0) {
+            res.successful = false;
+            res.reason = "mpc_mu must be below 1, the MPC bounds f_x and f_y only through the friction pyramid";
+            return res;
           } else if (param.get_name().find("cartesian_joint_control_gains") != std::string::npos
                      and param.as_double_array().size() != N_JOINTS_PER_LEG)
 
@@ -580,6 +584,10 @@ MITController::MITController(const std::string &nodeName)
   }
   if (this->get_parameter("mpc_alpha").as_double() <= 0.0) {
     RCLCPP_ERROR(this->get_logger(), "mpc_alpha must be positive, it holds the forces of swing feet at zero");
+    exit(-1);
+  }
+  if (this->get_parameter("mpc_mu").as_double() >= 1.0) {
+    RCLCPP_ERROR(this->get_logger(), "mpc_mu must be below 1, the MPC bounds f_x and f_y only through the friction pyramid");
     exit(-1);
   }
   if (this->get_parameter("mpc_flush_denormals").as_bool()

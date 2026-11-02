@@ -47,6 +47,8 @@ class MPC : public MPCInterface {
   typedef Eigen::Matrix<double, INPUT_SIZE, INPUT_SIZE, Eigen::ColMajor> RMatrixT;
   typedef Eigen::Matrix<double, STATE_SIZE, 1, Eigen::ColMajor> stateVecT;
   typedef Eigen::Matrix<double, INPUT_SIZE, 1, Eigen::ColMajor> inputVecT;
+  typedef Eigen::Matrix<double, NUM_FEET, INPUT_SIZE, Eigen::ColMajor> JbuMatrixT;
+  typedef Eigen::Matrix<double, NUM_FEET, 1, Eigen::ColMajor> uBoundVecT;
 
   // time varying A
   std::array<AMatrixT, PREDICTION_HORIZON> As_;
@@ -56,8 +58,8 @@ class MPC : public MPCInterface {
   Eigen::Matrix<double, NUM_FEET * NUM_POLY_CONST_PER_FOOT, STATE_SIZE, Eigen::ColMajor> ZeroC_;
   // fixed C;
   CMatrixT D_;
-  // fixed Jbu
-  RMatrixT Jbu;
+  // fixed Jbu, bounds only f_z
+  JbuMatrixT Jbu_;
   // fixed cost matrices Q and R,
   QMatrixT Q_;
   RMatrixT R_;
@@ -69,13 +71,12 @@ class MPC : public MPCInterface {
   // current state
   stateVecT x0_;
   // input forces bounds
-  std::array<inputVecT, PREDICTION_HORIZON> ulbs_;
-  std::array<inputVecT, PREDICTION_HORIZON> uubs_;
+  uBoundVecT ulb_;
+  uBoundVecT uub_;
   // some constants
   stateVecT stateOnes_;
   inputVecT inputOnes_;
   AMatrixT stateIdentity_;
-  RMatrixT inputIdentity_;
 
   /**
    * Contains the solver planned to be used
@@ -117,13 +118,11 @@ class MPC : public MPCInterface {
                          Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_ub);
   static void GetCUpperMask(const std::array<bool, NUM_FEET> &contact,
                             Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_ub_mask);
-  static void GetUBounds(const std::array<bool, NUM_FEET> &contact,
-                         double fmin,
-                         double fmax,
-                         double force_scale,
-                         Eigen::Ref<inputVecT> lb,
-                         Eigen::Ref<inputVecT> ub);
-  static void GetUBoundsMask(const std::array<bool, NUM_FEET> &contact, Eigen::Ref<inputVecT> u_mask);
+  static void GetUBounds(double fmin, double fmax, double force_scale, Eigen::Ref<uBoundVecT> lb, Eigen::Ref<uBoundVecT> ub);
+  static void GetUBoundsMask(const std::array<bool, NUM_FEET> &contact,
+                             double fmin,
+                             Eigen::Ref<uBoundVecT> lb_mask,
+                             Eigen::Ref<uBoundVecT> ub_mask);
 
  public:
   MPC(double alpha,
