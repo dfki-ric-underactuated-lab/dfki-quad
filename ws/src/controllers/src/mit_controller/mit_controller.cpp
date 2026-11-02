@@ -49,7 +49,7 @@ int main() {
           "SPEED_ABS",
           0,
           -1,
-          "qdldl");
+          "direct");
 
   // GaitSequencer
   // Gait gait( 1.0, 1.0, {0, 0, 0, 0}, MPC_DT,"test_gait_stand");

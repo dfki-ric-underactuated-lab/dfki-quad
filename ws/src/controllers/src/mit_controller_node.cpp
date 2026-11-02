@@ -67,11 +67,19 @@ MITController::MITController(const std::string &nodeName)
   this->declare_parameter<std::string>("mpc_solver", "PARTIAL_CONDENSING_HPIPM");
   this->declare_parameter<int>("mpc_condensed_size", MPC_PREDICTION_HORIZON / 2);
   this->declare_parameter<std::string>("mpc_hpipm_mode", "SPEED");
-  this->declare_parameter<std::string>("wbc.arc_opt.solver", "EiquadprogSolver");
+  // wbc solver plugin name (libwbc-solvers-<name>.so): eiquadprog, qpoases, proxqp, qpswift, hpipm, osqp, clarabel,
+  // daqp
+  this->declare_parameter<std::string>("wbc.arc_opt.solver", "eiquadprog");
   this->declare_parameter<std::string>("wbc.arc_opt.scene", "AccelerationSceneReducedTSID");
+  // HPIPM mode of the wbc, only used if wbc.arc_opt.solver is hpipm. Tolerances are applied on top of the preset.
+  this->declare_parameter<std::string>("wbc.arc_opt.hpipm_mode", "SPEED");
+  // Regularizes the joint accelerations / contact wrenches the wbc computes towards zero (>= 0)
+  this->declare_parameter<double>("wbc.arc_opt.acceleration_penalty", 1e-8);
+  this->declare_parameter<double>("wbc.arc_opt.contact_wrench_penalty", 1e-6);
   this->declare_parameter<int>("mpc_warm_start", 1);
   this->declare_parameter<double>("mpc_solver_tolerances", -1.0);
-  this->declare_parameter<std::string>("mpc_osqp_linsys_solver", "qdldl");
+  this->declare_parameter<std::string>("mpc_osqp_linsys_solver", "direct");  // direct | indirect
+  // <= 0 keeps the wbc solver's defaults
   this->declare_parameter<double>("wbc_solver_tolerances", -1.0);
 
   leg_control_mode_ = static_cast<LEGControlMode>(this->get_parameter("leg_control_mode").as_int());
@@ -532,8 +540,10 @@ MITController::MITController(const std::string &nodeName)
     mpc_solver = FULL_CONDENSING_DAQP;
   } else if (mpc_solver_name == "FULL_CONDENSING_QPOASES") {
     mpc_solver = FULL_CONDENSING_QPOASES;
+#ifdef ACADOS_WITH_QPDUNES
   } else if (mpc_solver_name == "PARTIAL_CONDENSING_QPDUNES") {
     mpc_solver = PARTIAL_CONDENSING_QPDUNES;
+#endif
   } else {
     RCLCPP_ERROR(this->get_logger(), "Unknown mpc solver: %s", mpc_solver_name.c_str());
     exit(-1);
@@ -618,7 +628,10 @@ MITController::MITController(const std::string &nodeName)
         as_eigen_vector<3>(this->get_parameter("wbc.arc_opt.feet_pose_Kd").as_double_array()),
         as_eigen_vector<6>(this->get_parameter("wbc.arc_opt.com_pose_saturation").as_double_array()),
         as_eigen_vector<3>(this->get_parameter("wbc.arc_opt.feet_pose_saturation").as_double_array()),
-        this->get_parameter("wbc_solver_tolerances").as_double()));
+        this->get_parameter("wbc_solver_tolerances").as_double(),
+        this->get_parameter("wbc.arc_opt.hpipm_mode").as_string(),
+        this->get_parameter("wbc.arc_opt.acceleration_penalty").as_double(),
+        this->get_parameter("wbc.arc_opt.contact_wrench_penalty").as_double()));
   } else {
     wbc_ptr = reinterpret_cast<WBCType *>(new InverseDynamics(
         std::make_unique<QuadModelPino>(quad_model_),

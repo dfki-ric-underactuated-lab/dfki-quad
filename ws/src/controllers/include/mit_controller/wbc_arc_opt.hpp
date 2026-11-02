@@ -75,7 +75,10 @@ class WBCArcOPT : public WBCInterface<JointTorqueVelocityPositionCommands> {
             const Eigen::Matrix<double, 3, 1>& feet_pose_d_gain,
             const Eigen::Matrix<double, 6, 1>& com_pose_saturation,
             const Eigen::Matrix<double, 3, 1>& feet_pose_saturation,
-            double solver_tolerances);
+            double solver_tolerances,
+            const std::string& hpipm_mode,
+            double acceleration_penalty,
+            double contact_wrench_penalty);
 
   void UpdateState(const StateInterface& quad_state) override;
   void UpdateModel(const ModelInterface& quad_model) override;

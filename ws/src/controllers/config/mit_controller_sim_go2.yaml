@@ -59,7 +59,7 @@ mit_controller_node: ##### SIMULATION
         foot_position_based_on_target_orientation: false
         transformation_filter_size: 20
       arc_opt:
-        solver: "EiquadprogSolver"
+        solver: "eiquadprog"
         model_urdf: "src/common/model/urdf/go2/urdf/go2_description.urdf"
         feet_names: [ "fl_contact", "fr_contact","bl_contact", "br_contact" ]
         joint_names: [ "fl_abad", "fl_shoulder", "fl_knee", "fr_abad", "fr_shoulder", "fr_knee", "bl_abad", "bl_shoulder", "bl_knee", "br_abad", "br_shoulder", "br_knee" ]

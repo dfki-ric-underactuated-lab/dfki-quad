@@ -1,13 +1,6 @@
 #include "mit_controller/wbc_arc_opt.hpp"
 
-#include <wbc/solvers/eiquadprog/EiquadprogSolver.hpp>
-#include <wbc/solvers/hpipm/HPIPMSolver.hpp>
-#include <wbc/solvers/osqp/OsqpSolver.hpp>
-#undef WARM_START  // Osqp header has some problematic defines
-#include <wbc/solvers/proxqp/ProxQPSolver.hpp>
-#include <wbc/solvers/qpoases/QPOasesSolver.hpp>
-#include <wbc/solvers/qpswift/QPSwiftSolver.hpp>  // Has to be here, as -fpermissive is triggered and only deactivated in this cpp
-// are included here for consistency
+#include <wbc/core/PluginLoader.hpp>
 
 WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
                      std::string solver,
@@ -25,7 +18,10 @@ WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
                      const Eigen::Matrix<double, 3, 1>& feet_pose_d_gain,
                      const Eigen::Matrix<double, 6, 1>& com_pose_saturation,
                      const Eigen::Matrix<double, 3, 1>& feet_pose_saturation,
-                     double solver_tolerances)
+                     double solver_tolerances,
+                     const std::string& hpipm_mode,
+                     double acceleration_penalty,
+                     double contact_wrench_penalty)
     : quad_state_(std::move(state)),
       feet_names_(feet_names),
       wbc_robot_model_(std::make_shared<wbc::RobotModelPinocchio>()),
@@ -48,77 +44,60 @@ WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
     throw std::runtime_error("Error in configuring wbc_robot_model");
   }
 
-  // Solver
-  if (solver == "EiquadprogSolver") {
-    auto solver = std::make_shared<wbc::EiquadprogSolver>();
-    // No options
-    wbc_solver_ = solver;
-  } else if (solver == "ProxQPSolver") {
-    auto solver = std::make_shared<wbc::ProxQPSolver>();
-    proxsuite::proxqp::Settings<double> solver_opts;
-    if (solver_tolerances >= 0.0) {
-      solver_opts.eps_abs = solver_tolerances;
-      solver_opts.eps_duality_gap_abs = solver_tolerances;
-    }
-    solver->setOptions(solver_opts);
-    wbc_solver_ = solver;
-  } else if (solver == "QPOasesSolver") {
-    auto solver = std::make_shared<wbc::QPOASESSolver>();
-    qpOASES::Options solver_opts;
-    solver_opts.setToMPC();
-    if (solver_tolerances >= 0.0) {
-      solver_opts.terminationTolerance = solver_tolerances;
-    }
-    solver_opts.printLevel = qpOASES::PL_NONE;
-    solver->setOptions(solver_opts);
-    wbc_solver_ = solver;
-  } else if (solver == "OSQPSolver") {
-    auto solver = std::make_shared<wbc::OsqpSolver>();
-    if (solver_tolerances >= 0.0) {
-      solver->solver.settings()->setAbsoluteTolerance(solver_tolerances);
-      solver->solver.settings()->setPrimalInfeasibilityTolerance(solver_tolerances);
-    }
-    solver->solver.settings()->setVerbosity(false);
-    wbc_solver_ = solver;
-  } else if (solver == "QPSwiftSolver") {
-    // Does not work in our case
-    wbc_solver_ = std::make_shared<wbc::QPSwiftSolver>();
-  } else if (solver == "HPIPMSolver") {
-    auto solver = std::make_shared<wbc::HPIPMSolver>();
-    double tolerance = solver_tolerances;
-    if (solver_tolerances >= 0.0) {
-      std::array<std::string, 4> fields = {"tol_dual_gap", "tol_eq", "tol_stat", "tol_comp"};
-      for (auto field : fields) {
-        solver->setOptions(field, &tolerance);
-      }
-    }
-    wbc_solver_ = solver;
-  } else {
+  // Solver: loaded as plugin by name, its options are set through the generic QPSolver interface (as in hyper_2)
+  std::cout << "Configuring wbc solver: " << solver << std::endl;
+  if (!wbc::PluginLoader::loadPlugin("libwbc-solvers-" + solver + ".so")) {
+    const char* dl_error = dlerror();
+    throw std::runtime_error(fmt::format(
+        "Could not load wbc solver plugin libwbc-solvers-{0}.so: {1}", solver, dl_error ? dl_error : "unknown error"));
+  }
+  wbc_solver_ = std::shared_ptr<wbc::QPSolver>(wbc::QPSolverFactory::createInstance(solver));
+  if (!wbc_solver_) {
     throw std::runtime_error(fmt::format("Unknown wbc solver {0}", solver));
+  }
+  if (solver == "hpipm") {
+    std::cout << "Set wbc solver mode to " << hpipm_mode << std::endl;
+    wbc_solver_->setMode(hpipm_mode);
+  }
+  if (solver_tolerances > 0.0) {
+    if (wbc_solver_->setTolerance(solver_tolerances)) {
+      std::cout << "Set wbc solver tolerance to " << solver_tolerances << std::endl;
+    } else {
+      std::cout << "WBC solver " << solver << " has no tolerance setting, ignoring wbc_solver_tolerances = "
+                << solver_tolerances << std::endl;
+    }
   }
 
   // Setup scene
+  std::cout << "Set wbc acceleration penalty to " << acceleration_penalty << ", contact wrench penalty to "
+            << contact_wrench_penalty << std::endl;
   if (scene == "AccelerationSceneReducedTSID") {
-    wbc_scene_ = std::make_unique<wbc::AccelerationSceneReducedTSID>(wbc_robot_model_, wbc_solver_, WBC_CYCLE_DT);
+    auto reduced_scene =
+        std::make_unique<wbc::AccelerationSceneReducedTSID>(wbc_robot_model_, wbc_solver_, WBC_CYCLE_DT);
+    reduced_scene->setAccelerationPenalty(acceleration_penalty);
+    reduced_scene->setContactWrenchPenalty(contact_wrench_penalty);
+    wbc_scene_ = std::move(reduced_scene);
   } else if (scene == "AccelerationSceneTSID") {
-    wbc_scene_ = std::make_unique<wbc::AccelerationSceneTSID>(wbc_robot_model_, wbc_solver_, WBC_CYCLE_DT);
+    auto tsid_scene = std::make_unique<wbc::AccelerationSceneTSID>(wbc_robot_model_, wbc_solver_, WBC_CYCLE_DT);
+    tsid_scene->setAccelerationPenalty(acceleration_penalty);
+    tsid_scene->setContactWrenchPenalty(contact_wrench_penalty);
+    wbc_scene_ = std::move(tsid_scene);
   } else {
     throw std::runtime_error(fmt::format("Unknown wbc scene {0}", scene));
   }
 
-  // TODO: increase if infeasible wbc_scene_->setHessianRegularizer()
   // Configure tasks
   std::vector<wbc::TaskPtr> wbc_tasks;
 #ifdef COM_TASK
   wbc_com_task_ = std::make_shared<wbc::SpatialAccelerationTask>(
       wbc::TaskConfig("body_pose",
                       0,
-                      to_vector(com_pose_weight),  // vector: xyz, roll pitch yaw
+                      com_pose_weight,  // vector: xyz, roll pitch yaw
                       1),
       wbc_robot_model_,
-      "base_link",
-      "world");
-  fmt::print("com weights: {} \n", fmt::join(wbc_com_task_->weights, ", "));
+      "base_link");  // reference in world frame
+  const auto& com_weights = wbc_com_task_->weights;
+  fmt::print("com weights: {} \n", fmt::join(com_weights.data(), com_weights.data() + com_weights.size(), ", "));
   wbc_tasks.push_back(wbc_com_task_);
 #else
   std::cout << "COM_TASK is deactivated" << std::endl;
@@ -130,10 +109,9 @@ WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
     wbc_foot_contact_tasks_[feet_idx] =
         std::make_shared<wbc::ContactForceTask>(wbc::TaskConfig(fmt::format("foot_contact_{}", feet_idx),
                                                                 0,
-                                                                to_vector(foot_force_weight),  // 6: force, torque
+                                                                foot_force_weight,  // 3: force
                                                                 quad_state_->GetFeetContacts()[feet_idx]),
-                                                wbc_robot_model_,
-                                                "world");
+                                                wbc_robot_model_);  // reference in world frame
     wbc_tasks.push_back(wbc_foot_contact_tasks_[feet_idx]);
 #else
     std::cout << "FEET_FORCE_TASK is deactivated" << std::endl;
@@ -143,11 +121,10 @@ WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
     wbc_foot_pose_tasks_[feet_idx] = std::make_shared<wbc::SpatialAccelerationTask>(
         wbc::TaskConfig(fmt::format("foot_pose_{}", feet_idx),
                         0,
-                        to_vector(stack(foot_pose_weight, Eigen::Vector3d::Zero().eval())),  // 6 dof vector
+                        stack(foot_pose_weight, Eigen::Vector3d::Zero().eval()),  // 6 dof vector
                         !quad_state_->GetFeetContacts()[feet_idx]),
         wbc_robot_model_,
-        feet_names[feet_idx],
-        "world");
+        feet_names[feet_idx]);  // reference in world frame
     wbc_tasks.push_back(wbc_foot_pose_tasks_[feet_idx]);
 #else
     std::cout << "FEET_POS_TASK is deactivated" << std::endl;

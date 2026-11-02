@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM ros:humble-ros-base-jammy
 
 # basic tooling & packages needed
@@ -71,11 +72,21 @@ ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
 
 # add adapted acados library and install it
 WORKDIR /root
- # to autmatically detect updates
-ADD https://api.github.com/repos/FranekStark/acados/commits/comparison_paper acados_version.json
-RUN git clone --branch comparison_paper https://github.com/FranekStark/acados && cd acados && git submodule update --recursive --init && mkdir build
+# Clarabel is a Rust library, so acados needs a cargo toolchain to build it
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+# ADD of a git ref rebuilds this layer whenever the branch moves (no GitHub API call, so no rate limit)
+ADD --keep-git-dir=true https://github.com/FranekStark/acados.git#comparison_paper_V2 /root/acados
+RUN cd acados && git submodule update --recursive --init && mkdir build
 WORKDIR /root/acados/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DACADOS_WITH_QPOASES=ON -DACADOS_WITH_OSQP=ON -DACADOS_WITH_QPDUNES=ON -DACADOS_WITH_DAQP=ON -DACADOS_INSTALL_DIR=/opt/acados -DACADOS_EXAMPLES=OFF && make install
+# acados also installs OSQP, Clarabel and DAQP into /opt/acados; wbc and osqp-eigen below use these copies,
+# so only one version of each solver ends up in the controller process
+RUN cmake ..    -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-march=native" -DCMAKE_CXX_FLAGS="-march=native" \
+                -DACADOS_WITH_QPOASES=ON \
+                -DACADOS_WITH_OSQP=ON -DOSQP_USE_LONG=OFF -DOSQP_ENABLE_PRINTING=OFF \
+                -DACADOS_WITH_CLARABEL=ON \
+                -DACADOS_WITH_DAQP=ON -DNATIVE_OPTIMIZATION=ON \
+                -DACADOS_INSTALL_DIR=/opt/acados -DACADOS_EXAMPLES=OFF && make -j$(nproc) install
 ENV LD_LIBRARY_PATH /opt/acados/lib:${LD_LIBRARY_PATH}
 ENV ACADOS_SOURCE_DIR "/root/acados"
 
@@ -133,16 +144,16 @@ RUN git clone --recursive https://github.com/fmtlib/fmt.git && cd fmt && git che
 # install arc-opt
 RUN apt-get update && apt-get -y install git cmake build-essential libboost-system-dev libboost-program-options-dev libboost-thread-dev libboost-test-dev pkg-config libeigen3-dev libboost-filesystem-dev
 RUN apt-get update && apt-get -y install liburdfdom-headers-dev liburdfdom-dev
-RUN git clone --branch refactoring --single-branch https://github.com/ARC-OPT/wbc.git && cd wbc && git checkout 5c39722c81d879425adeb4bbe9dcc7e85d1dea5c
+ADD --keep-git-dir=true https://github.com/jmiddelberg/wbc.git#comparison_paper_V2 /root/wbc
 RUN git clone --branch v2.6.8 --recurse-submodules https://github.com/stack-of-tasks/pinocchio.git && cd pinocchio && mkdir build && cd build && cmake .. -DBUILD_PYTHON_INTERFACE=OFF -DBUILD_UNIT_TESTS=OFF -DCMAKE_BUILD_TYPE=Release && make -j$(nproc) && make install
 RUN git clone https://github.com/coin-or/qpOASES.git -b releases/3.2.0 && cd qpOASES &&  mkdir patches && cp ../wbc/patches/qpOASES.patch patches && git apply patches/qpOASES.patch && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(nproc) && make install
 RUN git clone --recurse-submodules https://github.com/stack-of-tasks/eiquadprog.git -b v1.2.5 && cd eiquadprog && cp ../wbc/patches/eiquadprog.patch . && git apply eiquadprog.patch && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(nproc) && make install
 RUN git clone https://github.com/qpSWIFT/qpSWIFT.git && cd qpSWIFT && git checkout 24608b6 && cp ../wbc/patches/qpSWIFT.patch . && git apply qpSWIFT.patch && mkdir build && cd build && cmake .. && make -j$(nproc) && make install
 RUN git clone --branch v0.6.7 --recurse-submodules https://github.com/Simple-Robotics/proxsuite.git proxqp && cd proxqp && mkdir build && cd build && cmake .. -DBUILD_TESTING=OFF -DBUILD_PYTHON_INTERFACE=OFF -DBUILD_WITH_VECTORIZATION_SUPPORT=OFF -DCMAKE_BUILD_TYPE=Release && make -j$(nproc) && make install
-RUN git clone https://github.com/osqp/osqp.git && cd osqp && git checkout release-0.6.3 && git submodule update --recursive --init &&  mkdir build && cd build && cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --target install
-RUN git clone https://github.com/robotology/osqp-eigen.git && cd osqp-eigen && git checkout 85c3762 && git submodule update --recursive --init && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make -j$(nproc) && make install
+# osqp-eigen against the OSQP v1 that acados installed (no standalone OSQP: two versions in one process collide)
+RUN git clone https://github.com/robotology/osqp-eigen.git && cd osqp-eigen && git checkout v0.11.2 && git submodule update --recursive --init && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -Dosqp_DIR=/opt/acados/lib/cmake/osqp && make -j$(nproc) && make install
 
-RUN mkdir wbc/build && cd wbc/build && cmake .. -DROBOT_MODEL_RBDL=OFF -DROBOT_MODEL_KDL=OFF -DSOLVER_PROXQP=ON -DSOLVER_EIQUADPROG=ON -DSOLVER_QPSWIFT=ON -DSOLVER_OSQP=ON -DSOLVER_HPIPM=ON -DCMAKE_BUILD_TYPE=RELEASE && make -j$(nproc) && make install
+RUN mkdir wbc/build && cd wbc/build && cmake .. -DROBOT_MODEL_RBDL=OFF -DROBOT_MODEL_KDL=OFF -DSOLVER_DAQP=ON -DDAQP_ROOT=/opt/acados -Dosqp_DIR=/opt/acados/lib/cmake/osqp -DSOLVER_CLARABEL=ON -DCLARABEL_ROOT=/opt/acados -DSOLVER_PROXQP=ON -DSOLVER_EIQUADPROG=ON -DSOLVER_QPSWIFT=ON -DSOLVER_OSQP=ON -DSOLVER_HPIPM=ON -DCMAKE_BUILD_TYPE=RELEASE && make -j$(nproc) && make install
 RUN ldconfig
 
 # Install NMEA GPS driver

@@ -45,22 +45,16 @@ find_package(Matplot++ REQUIRED)
 find_package(unitree_go REQUIRED)
 find_package(fmt REQUIRED)
 find_package(PkgConfig REQUIRED)
-find_package(OsqpEigen REQUIRED)
 
 
 # ARCOPT
+# The QP solvers are not linked: they are plugins, loaded at runtime by name (libwbc-solvers-<name>.so)
 pkg_search_module(wbc-core REQUIRED IMPORTED_TARGET wbc-core)
 pkg_search_module(wbc-robot_models-pinocchio REQUIRED IMPORTED_TARGET wbc-robot_models-pinocchio)
-pkg_search_module(wbc-solvers-eiquadprog REQUIRED IMPORTED_TARGET wbc-solvers-eiquadprog)
-pkg_search_module(wbc-solvers-qpswift REQUIRED IMPORTED_TARGET wbc-solvers-qpswift)
-pkg_search_module(wbc-solvers-proxqp REQUIRED IMPORTED_TARGET wbc-solvers-proxqp)
-pkg_search_module(wbc-solvers-qpoases REQUIRED IMPORTED_TARGET wbc-solvers-qpoases)
 pkg_search_module(wbc-scenes-acceleration_reduced_tsid REQUIRED IMPORTED_TARGET wbc-scenes-acceleration_reduced_tsid)
 pkg_search_module(wbc-scenes-acceleration_tsid REQUIRED IMPORTED_TARGET wbc-scenes-acceleration_tsid)
 pkg_search_module(wbc-controllers REQUIRED IMPORTED_TARGET wbc-controllers)
-pkg_search_module(wbc-solvers-osqp REQUIRED IMPORTED_TARGET wbc-solvers-osqp)
 pkg_search_module(wbc-types REQUIRED IMPORTED_TARGET wbc-types)
-pkg_search_module(wbc-solvers-hpipm REQUIRED IMPORTED_TARGET wbc-solvers-hpipm)
 # pkg_search_module(base-types REQUIRED IMPORTED_TARGET base-types)
 
 
@@ -182,26 +176,13 @@ add_executable(mitcontrollernode
         src/SwingTrajectory.cpp
 )
 
-set_source_files_properties(
-        src/mit_controller/wbc_arc_opt.cpp
-        PROPERTIES
-        COMPILE_FLAGS -fpermissive
-)
-
 target_link_libraries(mitcontrollernode
         PkgConfig::wbc-core
         PkgConfig::wbc-robot_models-pinocchio
-        PkgConfig::wbc-solvers-eiquadprog
-        PkgConfig::wbc-solvers-qpswift
-        PkgConfig::wbc-solvers-proxqp
-        PkgConfig::wbc-solvers-qpoases
-        PkgConfig::wbc-solvers-osqp
         PkgConfig::wbc-scenes-acceleration_reduced_tsid
         PkgConfig::wbc-scenes-acceleration_tsid
         PkgConfig::wbc-controllers
         PkgConfig::wbc-types
-        OsqpEigen::OsqpEigen
-        PkgConfig::wbc-solvers-hpipm
 )
 
 if (ROBOT_NAME STREQUAL "ulab")
