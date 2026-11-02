@@ -79,6 +79,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ADD --keep-git-dir=true https://github.com/FranekStark/acados.git#comparison_paper_V2 /root/acados
 RUN cd acados && git submodule update --recursive --init && mkdir build
 WORKDIR /root/acados/build
+ENV RUSTFLAGS="-C target-cpu=native"
 # acados also installs OSQP, Clarabel and DAQP into /opt/acados; wbc and osqp-eigen below use these copies,
 # so only one version of each solver ends up in the controller process
 RUN cmake ..    -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-march=native" -DCMAKE_CXX_FLAGS="-march=native" \
@@ -86,6 +87,7 @@ RUN cmake ..    -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-march=native" -DCMA
                 -DACADOS_WITH_OSQP=ON -DOSQP_USE_LONG=OFF -DOSQP_ENABLE_PRINTING=OFF \
                 -DACADOS_WITH_CLARABEL=ON \
                 -DACADOS_WITH_DAQP=ON -DNATIVE_OPTIMIZATION=ON \
+                -DACADOS_WITH_PROXQP=ON -DACADOS_PROXQP_VECTORIZE=ON \
                 -DACADOS_INSTALL_DIR=/opt/acados -DACADOS_EXAMPLES=OFF && make -j$(nproc) install
 ENV LD_LIBRARY_PATH /opt/acados/lib:${LD_LIBRARY_PATH}
 ENV ACADOS_SOURCE_DIR "/root/acados"
