@@ -974,9 +974,11 @@ void MITController::MPCLoopCallback() {
   }
 
   if (open_loop_publisher_ != nullptr) {
-    assert(MPC_PREDICTION_HORIZON == 10);  // fixed message size
     static interfaces::msg::PositionSequence open_loop_positions;
-    for (unsigned int ol_idx = 0; ol_idx < MPC_PREDICTION_HORIZON; ol_idx++) {
+    // fixed message size: a longer horizon publishes only its first entries
+    const unsigned int ol_size =
+        std::min(static_cast<unsigned int>(MPC_PREDICTION_HORIZON), static_cast<unsigned int>(open_loop_positions.x.size()));
+    for (unsigned int ol_idx = 0; ol_idx < ol_size; ol_idx++) {
       open_loop_positions.valid[ol_idx] = true;
       open_loop_positions.x[ol_idx] = mpc_prediction_.position[ol_idx].x();
       open_loop_positions.y[ol_idx] = mpc_prediction_.position[ol_idx].y();

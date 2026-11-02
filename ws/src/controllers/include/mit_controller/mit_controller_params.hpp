@@ -1,9 +1,18 @@
 #pragma once
 
+// MPC prediction horizon (number of stages). Set at build time with
+//   colcon build --cmake-args -DDFKI_QUAD_MPC_HORIZON=<N>
+// (see CMakeLists.txt); defaults to 10.
+#ifndef DFKI_QUAD_MPC_HORIZON
+#define DFKI_QUAD_MPC_HORIZON 10
+#endif
+
 static constexpr int N_LEGS = 4;
 static constexpr int N_JOINTS_PER_LEG = 3;
 static constexpr int GAIT_SEQUENCE_SIZE = 100;
-static constexpr int MPC_PREDICTION_HORIZON = 10;
+static constexpr int MPC_PREDICTION_HORIZON = DFKI_QUAD_MPC_HORIZON;
+static_assert(MPC_PREDICTION_HORIZON >= 1, "DFKI_QUAD_MPC_HORIZON must be at least 1");
+static_assert(MPC_PREDICTION_HORIZON + 1 <= GAIT_SEQUENCE_SIZE, "the gait sequence must cover the MPC horizon");
 static constexpr double MPC_DT = 0.05;
 static constexpr double MPC_CONTROL_DT = 0.01;
 static constexpr double SWING_LEG_DT = 0.002;

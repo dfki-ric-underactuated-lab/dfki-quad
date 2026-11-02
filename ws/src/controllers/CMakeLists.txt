@@ -20,6 +20,11 @@ else ()
     message(WARNING "detected non ARM architecture, applying -Ofast - this might be harmfull!")
 endif ()
 
+# MPC prediction horizon, compiled in (mit_controller_params.hpp). Directory-wide on
+# purpose: every target that includes the params header must agree on it.
+set(DFKI_QUAD_MPC_HORIZON 10 CACHE STRING "MPC prediction horizon (stages)")
+add_compile_definitions(DFKI_QUAD_MPC_HORIZON=${DFKI_QUAD_MPC_HORIZON})
+
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
