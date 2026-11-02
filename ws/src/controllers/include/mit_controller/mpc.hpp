@@ -33,6 +33,7 @@ class MPC : public MPCInterface {
   double fmin_;
   double fmax_;
   double mu_;
+  bool flush_denormals_;
 
   // This typedefs automatically enforce the correct storage order to be used as raw pointers for acados
   // (see: https://discourse.acados.org/t/storage-order-of-c-interface/1379/3)
@@ -135,7 +136,8 @@ class MPC : public MPCInterface {
       int clarabel_iter_ref_max_iter,
       bool clarabel_equilibrate,
       double clarabel_max_step_fraction,
-      bool x0_as_equality
+      bool x0_as_equality,
+      bool flush_denormals
     );
 
   void UpdateState(const StateInterface &quad_state) override;

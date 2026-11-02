@@ -22,6 +22,7 @@
 #include "interfaces/msg/wbc_target.hpp"
 #include "interfaces/srv/change_leg_driver_mode.hpp"
 #include "mit_controller/adaptive_gait_sequencer.hpp"
+#include "mit_controller/flush_denormals.hpp"
 #include "mit_controller/gait_sequence_to_msg.hpp"
 #include "mit_controller/gait_sequencer_interface.hpp"
 #include "mit_controller/inverse_dynamics.hpp"

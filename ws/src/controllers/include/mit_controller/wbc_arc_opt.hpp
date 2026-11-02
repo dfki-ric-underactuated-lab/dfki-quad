@@ -57,6 +57,7 @@ class WBCArcOPT : public WBCInterface<JointTorqueVelocityPositionCommands> {
   // wbc::JointIntegrator joint_integrator_;
 
   double last_wbc_model_update_time_;
+  bool flush_denormals_;
 
  public:
   WBCArcOPT(std::unique_ptr<StateInterface> state,
@@ -78,7 +79,8 @@ class WBCArcOPT : public WBCInterface<JointTorqueVelocityPositionCommands> {
             double solver_tolerances,
             const std::string& hpipm_mode,
             double acceleration_penalty,
-            double contact_wrench_penalty);
+            double contact_wrench_penalty,
+            bool flush_denormals);
 
   void UpdateState(const StateInterface& quad_state) override;
   void UpdateModel(const ModelInterface& quad_model) override;

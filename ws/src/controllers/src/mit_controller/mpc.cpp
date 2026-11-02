@@ -9,6 +9,7 @@
 #include "acados_c/dense_qp_interface.h"
 #include "common/eigen_util.hpp"
 #include "common/quaternion_operations.hpp"
+#include "mit_controller/flush_denormals.hpp"
 
 void MPC::GetA(double psi, double dt, bool update_linearization, Eigen::Ref<AMatrixT> A) {
   if (!update_linearization) {
@@ -133,13 +134,15 @@ MPC::MPC(double alpha,
          int clarabel_iter_ref_max_iter,
          bool clarabel_equilibrate,
          double clarabel_max_step_fraction,
-         bool x0_as_equality)
+         bool x0_as_equality,
+         bool flush_denormals)
     : quad_model_(std::move(quad_model)),
       model_update_(false),
       quad_state_(std::move(quad_state)),
       fmin_(fmin),
       fmax_(fmax),
       mu_(mu),
+      flush_denormals_(flush_denormals),
       stateOnes_(stateVecT::Ones()),
       inputOnes_(inputVecT::Ones()),
       stateIdentity_(AMatrixT::Identity()),
@@ -495,7 +498,12 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
   // print_ocp_qp_dims(ocp_dims_);
 
   // Solving
-  int acados_return = ocp_qp_solve(qp_solver_, qp_in_, qp_out_);
+  int acados_return = ACADOS_SUCCESS;
+  {
+    // only the solver call runs with subnormal numbers flushed to zero (mpc_flush_denormals)
+    ScopedFlushDenormals flush(flush_denormals_);
+    acados_return = ocp_qp_solve(qp_solver_, qp_in_, qp_out_);
+  }
 
 #ifdef DEBUG_PRINTS
   if (acados_return == ACADOS_SUCCESS) {

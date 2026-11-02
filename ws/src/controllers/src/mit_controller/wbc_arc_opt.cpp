@@ -2,6 +2,8 @@
 
 #include <wbc/core/PluginLoader.hpp>
 
+#include "mit_controller/flush_denormals.hpp"
+
 WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
                      std::string solver,
                      std::string scene,
@@ -21,12 +23,14 @@ WBCArcOPT::WBCArcOPT(std::unique_ptr<StateInterface> state,
                      double solver_tolerances,
                      const std::string& hpipm_mode,
                      double acceleration_penalty,
-                     double contact_wrench_penalty)
+                     double contact_wrench_penalty,
+                     bool flush_denormals)
     : quad_state_(std::move(state)),
       feet_names_(feet_names),
       wbc_robot_model_(std::make_shared<wbc::RobotModelPinocchio>()),
       active_foot_contacts_(ModelInterface::N_LEGS),
-      last_wbc_model_update_time_(0.0) {
+      last_wbc_model_update_time_(0.0),
+      flush_denormals_(flush_denormals) {
   joint_cmd_.clear();
   // Configure robot model
   wbc::RobotModelConfig model_config;
@@ -311,6 +315,8 @@ WBCReturn WBCArcOPT::GetJointCommand(JointTorqueVelocityPositionCommands& joint_
   std::chrono::high_resolution_clock::time_point wbc_solve_tic, wbc_solve_toc;
   try {
     wbc_solve_tic = std::chrono::high_resolution_clock::now();
+    // only the solver call runs with subnormal numbers flushed to zero (wbc.arc_opt.flush_denormals)
+    ScopedFlushDenormals flush(flush_denormals_);
     joint_cmd_ = wbc_scene_->solve(qp);
   } catch (const std::runtime_error& err) {
     std::cout << " ARC-OPT solver failed: " << err.what() << std::endl;

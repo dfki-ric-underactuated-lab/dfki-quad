@@ -54,7 +54,8 @@ int main() {
           10,
           true,
           0.99,
-          false);
+          false,
+          true);
 
   // GaitSequencer
   // Gait gait( 1.0, 1.0, {0, 0, 0, 0}, MPC_DT,"test_gait_stand");

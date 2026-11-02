@@ -90,6 +90,10 @@ MITController::MITController(const std::string &nodeName)
   // Declare the initial state constraint as an equality (nbxe), so acados eliminates x0 from the QP instead of
   // passing lbx == ubx as two inequalities. Applies to all QP solvers.
   this->declare_parameter<bool>("mpc_x0_as_equality", false);
+  // Flush subnormal floating-point numbers to zero while the QP solvers run (FTZ/DAZ on x86, FZ on ARM). Warm-started
+  // first-order solvers accumulate them and x86 computes with them on a slow path.
+  this->declare_parameter<bool>("mpc_flush_denormals", true);
+  this->declare_parameter<bool>("wbc.arc_opt.flush_denormals", true);
   // <= 0 keeps the wbc solver's defaults
   this->declare_parameter<double>("wbc_solver_tolerances", -1.0);
 
@@ -567,6 +571,14 @@ MITController::MITController(const std::string &nodeName)
     RCLCPP_ERROR(this->get_logger(), "Unknown mpc solver: %s", mpc_solver_name.c_str());
     exit(-1);
   }
+  if (this->get_parameter("mpc_flush_denormals").as_bool()
+      || this->get_parameter("wbc.arc_opt.flush_denormals").as_bool()) {
+    if (ScopedFlushDenormals::Supported()) {
+      RCLCPP_INFO(this->get_logger(), "QP solves flush subnormal numbers to zero");
+    } else {
+      RCLCPP_WARN(this->get_logger(), "Flushing subnormal numbers is not supported on this CPU architecture");
+    }
+  }
   mpc_ = std::make_unique<MPC>(this->get_parameter("mpc_alpha").as_double(),
                                state_weights_stand_,
                                this->get_parameter("mpc_mu").as_double(),
@@ -584,7 +596,8 @@ MITController::MITController(const std::string &nodeName)
                                this->get_parameter("mpc_clarabel_iter_ref_max_iter").as_int(),
                                this->get_parameter("mpc_clarabel_equilibrate").as_bool(),
                                this->get_parameter("mpc_clarabel_max_step_fraction").as_double(),
-                               this->get_parameter("mpc_x0_as_equality").as_bool());
+                               this->get_parameter("mpc_x0_as_equality").as_bool(),
+                               this->get_parameter("mpc_flush_denormals").as_bool());
 
   gs_->UpdateTarget(target_);
   Eigen::Vector<double, ModelAdaptationInterface::NUM_PARAMS> conv_thresh =
@@ -655,7 +668,8 @@ MITController::MITController(const std::string &nodeName)
         this->get_parameter("wbc_solver_tolerances").as_double(),
         this->get_parameter("wbc.arc_opt.hpipm_mode").as_string(),
         this->get_parameter("wbc.arc_opt.acceleration_penalty").as_double(),
-        this->get_parameter("wbc.arc_opt.contact_wrench_penalty").as_double()));
+        this->get_parameter("wbc.arc_opt.contact_wrench_penalty").as_double(),
+        this->get_parameter("wbc.arc_opt.flush_denormals").as_bool()));
   } else {
     wbc_ptr = reinterpret_cast<WBCType *>(new InverseDynamics(
         std::make_unique<QuadModelPino>(quad_model_),
