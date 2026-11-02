@@ -75,10 +75,11 @@ void SwingLegController::UpdateGaitSequence(const GaitSequence &gs) {
     } else if (leg_states_[leg_idx] == STANCE) {  // Schedule for next phase
       swing_trajectories_[leg_idx].setInitialPosition(gs.foot_position_sequence[start_idx - 1][leg_idx]);
     }
-    // Target positions
-    if (leg_states_[leg_idx] == NOT_STARTED or leg_states_[leg_idx] == STANCE
-        or (leg_states_[leg_idx] == SWINGING
-            and (progress_[leg_idx] <= maximum_swing_leg_progress_to_update_target_))) {
+    // Target positions (only if the sequence contains the touchdown, a standing leg has none)
+    if (end_idx < GAIT_SEQUENCE_SIZE
+        and (leg_states_[leg_idx] == NOT_STARTED or leg_states_[leg_idx] == STANCE
+             or (leg_states_[leg_idx] == SWINGING
+                 and (progress_[leg_idx] <= maximum_swing_leg_progress_to_update_target_)))) {
       swing_trajectories_[leg_idx].setFinalPosition(gs.foot_position_sequence[end_idx][leg_idx]);
     }
   }

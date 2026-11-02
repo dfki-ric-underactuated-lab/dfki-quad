@@ -1258,12 +1258,22 @@ void MITController::ControlLoopCallback() {
         feet_targets.velocities[leg_idx].setZero();
         feet_targets.accelerations[leg_idx].setZero();
         feet_targets.positions[leg_idx] = early_contact_hold_position_[leg_idx];
-        // Next stance phase targets have to be transformed to current pose
-        int next_stance_indx = int(gait_sequence_temp.swing_time_sequence[0][leg_idx] / MPC_DT) + 1;
-        assert(gait_sequence_temp.contact_sequence[next_stance_indx][leg_idx] == true);
-        wrenches[leg_idx] = quad_state_temp.GetOrientationInWorld()
-                            * gait_sequence_temp.reference_trajectory_orientation[next_stance_indx].inverse()
-                            * wrench_sequence_temp.forces[next_stance_indx][leg_idx];
+        // Next stance phase targets have to be transformed to current pose. The MPC plans forces for its horizon
+        // only, without a planned stance there the foot gets none.
+        int next_stance_indx = -1;
+        for (int k = 0; k < MPC_PREDICTION_HORIZON; k++) {
+          if (gait_sequence_temp.contact_sequence[k][leg_idx]) {
+            next_stance_indx = k;
+            break;
+          }
+        }
+        if (next_stance_indx >= 0) {
+          wrenches[leg_idx] = quad_state_temp.GetOrientationInWorld()
+                              * gait_sequence_temp.reference_trajectory_orientation[next_stance_indx].inverse()
+                              * wrench_sequence_temp.forces[next_stance_indx][leg_idx];
+        } else {
+          wrenches[leg_idx].setZero();
+        }
       } break;
       case LOST_CONTACT: {
         // Keep foot on lost position
