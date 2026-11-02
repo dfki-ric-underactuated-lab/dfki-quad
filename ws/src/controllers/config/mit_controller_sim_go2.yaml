@@ -21,7 +21,7 @@ mit_controller_node: ##### SIMULATION
     slc_swing_height: 0.05
     slc_world_blend: 1.0
     mpc_alpha: 0.00001
-    mpc_warm_start: 1 # 0: off,  1: warm start, 2: hot start (some solvers)
+    mpc_warm_start: 1 # 0: off, 1: from the previous solution (HPIPM: needs mpc_x0_as_equality: true)
     ########################## roll, pitch, yaw, x   , y   ,  z, rolld,pitchd,yawd, xd, yd , zd
     mpc_state_weights_stand: [ 30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ]
     # mpc_state_weights_move: [ 150.0, 150.0, 50.0, 0.0, 0.0, 80.0, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3 ]

@@ -25,7 +25,7 @@ mit_controller_node: ##### REAL SYSTEM
     mpc_mu: 0.45
     mpc_fmin: 5.0
     mpc_fmax: 400.0
-    mpc_warm_start: 1 # 0: off,  1: warm start, 2: hot start (some solvers)
+    mpc_warm_start: 1 # 0: off, 1: from the previous solution (HPIPM: needs mpc_x0_as_equality: true)
     ma_mode: 0 #0:KF, 1:RLS
     ma_forgetting_factor: 0.5
     ma_convergence_threshold: [0.695, 0.12, 0.11]

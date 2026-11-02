@@ -76,6 +76,8 @@ MITController::MITController(const std::string &nodeName)
   // Regularizes the joint accelerations / contact wrenches the wbc computes towards zero (>= 0)
   this->declare_parameter<double>("wbc.arc_opt.acceleration_penalty", 1e-8);
   this->declare_parameter<double>("wbc.arc_opt.contact_wrench_penalty", 1e-6);
+  // Warm start each QP from the previous successful solution (1) or not (0). HPIPM reuses its multipliers and slacks,
+  // which needs mpc_x0_as_equality: true. Clarabel cannot be warm started.
   this->declare_parameter<int>("mpc_warm_start", 1);
   this->declare_parameter<double>("mpc_solver_tolerances", -1.0);
   this->declare_parameter<std::string>("mpc_osqp_linsys_solver", "direct");  // direct | indirect
@@ -580,6 +582,10 @@ MITController::MITController(const std::string &nodeName)
 #endif
   } else {
     RCLCPP_ERROR(this->get_logger(), "Unknown mpc solver: %s", mpc_solver_name.c_str());
+    exit(-1);
+  }
+  if (this->get_parameter("mpc_warm_start").as_int() != 0 && this->get_parameter("mpc_warm_start").as_int() != 1) {
+    RCLCPP_ERROR(this->get_logger(), "mpc_warm_start must be 0 (off) or 1 (on)");
     exit(-1);
   }
   if (this->get_parameter("mpc_alpha").as_double() <= 0.0) {

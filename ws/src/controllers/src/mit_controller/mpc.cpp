@@ -146,6 +146,8 @@ MPC::MPC(double alpha,
       mu_(mu),
       flush_denormals_(flush_denormals),
       force_scale_(1.0),
+      warm_start_(warm_start),
+      last_solve_succeeded_(false),
       stateOnes_(stateVecT::Ones()),
       inputOnes_(inputVecT::Ones()),
       stateIdentity_(AMatrixT::Identity()) {
@@ -321,8 +323,13 @@ MPC::MPC(double alpha,
         solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "osqp_polish", &polish);
   }
 
-  ocp_qp_xcond_solver_opts_set(
-      solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "warm_start", &warm_start);
+  // HPIPM's warm start 1 only keeps the primal solution, which acados zeroes before every solve, 2 also keeps multipliers
+  // and slacks. HPIPM's warm start 2 needs x0 as equality (x0_as_equality): with x0 as two-sided bounds the multipliers
+  // of these bounds diverge.
+  if ((solver == PARTIAL_CONDENSING_HPIPM || solver == FULL_CONDENSING_HPIPM) && warm_start_ > 0) {
+    warm_start_ = 2;
+  }
+  std::cout << "Set qp solver warm start to " << warm_start_ << std::endl;
 
   // Set all tolerances
   if (solver_tolerances > 0.0) {
@@ -525,6 +532,18 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
   // print_ocp_qp_dims(ocp_dims_);
 
   // Solving
+  // After a failed solve the next one starts cold, and HPIPM gets a new workspace: a solve on NaN data leaves NaNs in its
+  // multipliers and workspace that make all later solves fail
+  int warm_start = warm_start_;
+  if (!last_solve_succeeded_) {
+    warm_start = 0;
+    if (solver_plan_.qp_solver == PARTIAL_CONDENSING_HPIPM || solver_plan_.qp_solver == FULL_CONDENSING_HPIPM) {
+      solver_config_->memory_reset(
+          solver_config_, solver_dims_, qp_in_, qp_out_, solver_opts_, qp_solver_->mem, qp_solver_->work);
+    }
+  }
+  ocp_qp_xcond_solver_opts_set(
+      solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "warm_start", &warm_start);
   int acados_return = ACADOS_SUCCESS;
   {
     // only the solver call runs with subnormal numbers flushed to zero (mpc_flush_denormals)
@@ -566,6 +585,7 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
   solver_information.acados_t_computed = reinterpret_cast<qp_info *>(qp_out_->misc)->t_computed;
 
   solver_information.success = (acados_return == ACADOS_SUCCESS);
+  last_solve_succeeded_ = solver_information.success;
 
   if (acados_return == ACADOS_SUCCESS) {
     // Some solver (including OSQP) might not check for NaN's, to not overwrite the last solution lets test the first
@@ -574,6 +594,7 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
       std::cout << "NaN detected in solution after solver success" << std::endl;
       solver_information.return_code = -7777;
       solver_information.success = false;
+      last_solve_succeeded_ = false;
       return;  // Immediately return to not destory data
     }
     // Get data

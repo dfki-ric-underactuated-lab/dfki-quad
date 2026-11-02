@@ -36,6 +36,9 @@ class MPC : public MPCInterface {
   bool flush_denormals_;
   // The QP inputs are the forces divided by this scale (see scale_inputs)
   double force_scale_;
+  // QP solver warm start option, only used after a successful solve
+  int warm_start_;
+  bool last_solve_succeeded_;
 
   // This typedefs automatically enforce the correct storage order to be used as raw pointers for acados
   // (see: https://discourse.acados.org/t/storage-order-of-c-interface/1379/3)
