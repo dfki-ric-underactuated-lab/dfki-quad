@@ -79,6 +79,17 @@ MITController::MITController(const std::string &nodeName)
   this->declare_parameter<int>("mpc_warm_start", 1);
   this->declare_parameter<double>("mpc_solver_tolerances", -1.0);
   this->declare_parameter<std::string>("mpc_osqp_linsys_solver", "direct");  // direct | indirect
+  // Clarabel accuracy preset: REDUCED_ACCURACY | FULL_ACCURACY. mpc_solver_tolerances (if > 0) override its
+  // feasibility and gap tolerances.
+  this->declare_parameter<std::string>("mpc_clarabel_mode", "REDUCED_ACCURACY");
+  // Clarabel: maximum iterative refinement steps per linear solve (0 disables refinement)
+  this->declare_parameter<int>("mpc_clarabel_iter_ref_max_iter", 10);
+  this->declare_parameter<bool>("mpc_clarabel_equilibrate", true);
+  // Clarabel: maximum interior point step length fraction
+  this->declare_parameter<double>("mpc_clarabel_max_step_fraction", 0.99);
+  // Declare the initial state constraint as an equality (nbxe), so acados eliminates x0 from the QP instead of
+  // passing lbx == ubx as two inequalities. Applies to all QP solvers.
+  this->declare_parameter<bool>("mpc_x0_as_equality", false);
   // <= 0 keeps the wbc solver's defaults
   this->declare_parameter<double>("wbc_solver_tolerances", -1.0);
 
@@ -534,6 +545,14 @@ MITController::MITController(const std::string &nodeName)
     mpc_solver = PARTIAL_CONDENSING_HPIPM;
   } else if (mpc_solver_name == "PARTIAL_CONDENSING_OSQP") {
     mpc_solver = PARTIAL_CONDENSING_OSQP;
+  } else if (mpc_solver_name == "PARTIAL_CONDENSING_CLARABEL") {
+    mpc_solver = PARTIAL_CONDENSING_CLARABEL;
+#ifdef ACADOS_WITH_PROXQP
+  } else if (mpc_solver_name == "PARTIAL_CONDENSING_PROXQP") {
+    mpc_solver = PARTIAL_CONDENSING_PROXQP;
+  } else if (mpc_solver_name == "FULL_CONDENSING_PROXQP") {
+    mpc_solver = FULL_CONDENSING_PROXQP;
+#endif
   } else if (mpc_solver_name == "FULL_CONDENSING_HPIPM") {
     mpc_solver = FULL_CONDENSING_HPIPM;
   } else if (mpc_solver_name == "FULL_CONDENSING_DAQP") {
@@ -560,7 +579,12 @@ MITController::MITController(const std::string &nodeName)
                                this->get_parameter("mpc_hpipm_mode").as_string(),
                                this->get_parameter("mpc_warm_start").as_int(),
                                this->get_parameter("mpc_solver_tolerances").as_double(),
-                               this->get_parameter("mpc_osqp_linsys_solver").as_string());
+                               this->get_parameter("mpc_osqp_linsys_solver").as_string(),
+                               this->get_parameter("mpc_clarabel_mode").as_string(),
+                               this->get_parameter("mpc_clarabel_iter_ref_max_iter").as_int(),
+                               this->get_parameter("mpc_clarabel_equilibrate").as_bool(),
+                               this->get_parameter("mpc_clarabel_max_step_fraction").as_double(),
+                               this->get_parameter("mpc_x0_as_equality").as_bool());
 
   gs_->UpdateTarget(target_);
   Eigen::Vector<double, ModelAdaptationInterface::NUM_PARAMS> conv_thresh =

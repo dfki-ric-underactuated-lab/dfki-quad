@@ -49,7 +49,12 @@ int main() {
           "SPEED_ABS",
           0,
           -1,
-          "direct");
+          "direct",
+          "REDUCED_ACCURACY",
+          10,
+          true,
+          0.99,
+          false);
 
   // GaitSequencer
   // Gait gait( 1.0, 1.0, {0, 0, 0, 0}, MPC_DT,"test_gait_stand");

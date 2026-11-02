@@ -128,7 +128,12 @@ MPC::MPC(double alpha,
          std::string hpipm_mode,
          int warm_start,
          double solver_tolerances,
-         std::string osqp_linsys_solver)
+         std::string osqp_linsys_solver,
+         std::string clarabel_mode,
+         int clarabel_iter_ref_max_iter,
+         bool clarabel_equilibrate,
+         double clarabel_max_step_fraction,
+         bool x0_as_equality)
     : quad_model_(std::move(quad_model)),
       model_update_(false),
       quad_state_(std::move(quad_state)),
@@ -197,6 +202,12 @@ MPC::MPC(double alpha,
     ocp_qp_dims_set(solver_config_, ocp_dims_, k, "nbu", &nbu);
   }
 
+  // Declaring x0 as equality lets acados eliminate it from the QP (reduce_eq_dof in the condensing
+  // module) instead of passing lbx == ubx as two inequalities, which have no strict interior.
+  if (x0_as_equality) {
+    ocp_qp_dims_set(solver_config_, ocp_dims_, 0, "nbxe", &nx);
+  }
+
   // last stage has no controls
   ocp_qp_dims_set(solver_config_, ocp_dims_, PREDICTION_HORIZON, "nu", &zero);
   ocp_qp_dims_set(solver_config_, ocp_dims_, PREDICTION_HORIZON, "ng", &zero);
@@ -215,6 +226,14 @@ MPC::MPC(double alpha,
   }
   ocp_qp_in_set(solver_config_, qp_in_, PREDICTION_HORIZON, const_cast<char *>("Q"), Q_.data());
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("Jbx"), stateIdentity_.data());
+  if (x0_as_equality) {
+    std::array<int, STATE_SIZE> idxbxe;
+    for (int i = 0; i < STATE_SIZE; i++) {
+      idxbxe[i] = i;
+    }
+    ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("idxbxe"), idxbxe.data());
+  }
+  std::cout << "x0 as equality: " << (x0_as_equality ? "true" : "false") << std::endl;
 
   // create solver
   solver_dims_ = ocp_qp_xcond_solver_dims_create_from_ocp_qp_dims(solver_config_, ocp_dims_);
@@ -236,6 +255,35 @@ MPC::MPC(double alpha,
                                  "hpipm_mode",
                                  (void *)hpipm_mode.c_str());
   }
+  if (solver == PARTIAL_CONDENSING_CLARABEL) {
+    assert(clarabel_mode == "REDUCED_ACCURACY" or clarabel_mode == "FULL_ACCURACY");
+    std::cout << "Set clarabel mode to " << clarabel_mode.c_str() << std::endl;
+    ocp_qp_xcond_solver_opts_set(solver_config_,
+                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                 "clarabel_mode",
+                                 (void *)clarabel_mode.c_str());
+    // Constraint sides at +-POS_UNBOUND are dropped instead of being passed as rows. The threshold is below
+    // POS_UNBOUND so that bounds shifted by partial condensing still count as unbounded.
+    double inf_bound = 0.1 * POS_UNBOUND;
+    ocp_qp_xcond_solver_opts_set(
+        solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "clarabel_inf_bound", &inf_bound);
+    std::cout << "Set clarabel iterative refinement max iter to " << clarabel_iter_ref_max_iter << ", equilibration "
+              << (clarabel_equilibrate ? "on" : "off") << ", max step fraction " << clarabel_max_step_fraction
+              << std::endl;
+    ocp_qp_xcond_solver_opts_set(solver_config_,
+                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                 "clarabel_iter_ref_max_iter",
+                                 &clarabel_iter_ref_max_iter);
+    int equilibrate = clarabel_equilibrate ? 1 : 0;
+    ocp_qp_xcond_solver_opts_set(solver_config_,
+                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                 "clarabel_equilibrate_enable",
+                                 &equilibrate);
+    ocp_qp_xcond_solver_opts_set(solver_config_,
+                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                 "clarabel_max_step_fraction",
+                                 &clarabel_max_step_fraction);
+  }
   if (solver == PARTIAL_CONDENSING_OSQP) {
     std::cout << "Set osqp linear system solver to " << osqp_linsys_solver.c_str() << std::endl;
     ocp_qp_xcond_solver_opts_set(solver_config_,
@@ -243,10 +291,8 @@ MPC::MPC(double alpha,
                                  "osqp_linsys_solver",
                                  (void *)osqp_linsys_solver.c_str());
     int polish = 0;
-    ocp_qp_xcond_solver_opts_set(solver_config_,
-                                  reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
-                                  "osqp_polish",
-                                  &polish);                  
+    ocp_qp_xcond_solver_opts_set(
+        solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "osqp_polish", &polish);
   }
 
   ocp_qp_xcond_solver_opts_set(
@@ -263,7 +309,7 @@ MPC::MPC(double alpha,
   // Set max iter high to reach requested tolerance
   int max_iter = 1000;
   ocp_qp_xcond_solver_opts_set(
-    solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "iter_max", &max_iter);
+      solver_config_, reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_), "iter_max", &max_iter);
 
   qp_solver_ = ocp_qp_create(solver_config_, solver_dims_, solver_opts_);
 

@@ -130,7 +130,12 @@ class MPC : public MPCInterface {
       std::string hpipm_mode,
       int warm_start,
       double solver_tolerances,
-      std::string osqp_linsys_solver
+      std::string osqp_linsys_solver,
+      std::string clarabel_mode,
+      int clarabel_iter_ref_max_iter,
+      bool clarabel_equilibrate,
+      double clarabel_max_step_fraction,
+      bool x0_as_equality
     );
 
   void UpdateState(const StateInterface &quad_state) override;
