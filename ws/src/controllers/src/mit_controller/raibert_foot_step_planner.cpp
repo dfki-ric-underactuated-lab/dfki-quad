@@ -3,6 +3,7 @@
 #include <cmath>
 #include <common/model_interface.hpp>
 #include <common/state_interface.hpp>
+#include <limits>
 #include <vector>
 
 #include "gait_sequence.hpp"
@@ -95,26 +96,20 @@ void RaibertFootStepPlanner::get_foot_position_sequence(GaitSequence &gait_seque
             foot_position_sequence[i][leg].z() =
                 last_foot_heights_[leg];  // TODO: this is an slightly improved ugly hotfix
           }
-          // clip foot position to reachable position
-          if ((calc_p_shoulder(leg, position, orientation) - foot_position_sequence[i][leg]).norm() > max_leg_length_) {
-            Eigen::Vector3d dif = foot_position_sequence[i][leg] - calc_p_shoulder(leg, position, orientation);
-            Eigen::Vector3d new_dif;
+          // clip foot position to reachable position: scale the horizontal offset from the shoulder onto the
+          // reachable circle at the foot height, keeping its direction
+          Eigen::Vector3d p_shoulder = calc_p_shoulder(leg, position, orientation);
+          if ((p_shoulder - foot_position_sequence[i][leg]).norm() > max_leg_length_) {
+            Eigen::Vector3d dif = foot_position_sequence[i][leg] - p_shoulder;
             if (std::abs(dif.z()) <= max_leg_length_) {
-              // avoid zero division while keeping dx/dy const
-              if (std::abs(dif.x()) > std::abs(dif.y())) {
-                new_dif.x() = -sqrt(-(dif.z() - max_leg_length_) * (dif.z() + max_leg_length_)
-                                    / ((dif.y() / dif.x()) * (dif.y() / dif.x()) + 1));
-                new_dif.y() = (dif.y() / dif.x()) * new_dif.x();
-              } else {
-                new_dif.y() = -sqrt(-(dif.z() - max_leg_length_) * (dif.z() + max_leg_length_)
-                                    / ((dif.x() / dif.y()) * (dif.x() / dif.y()) + 1));
-                new_dif.x() = (dif.x() / dif.y()) * new_dif.y();
+              double xy_len = std::sqrt(max_leg_length_ * max_leg_length_ - dif.z() * dif.z());
+              double dxy = dif.segment<2>(0).norm();
+              if (dxy > std::numeric_limits<double>::epsilon()) {
+                dif.segment<2>(0) *= xy_len / dxy;
               }
-              new_dif.z() = dif.z();
-              foot_position_sequence[i][leg] = calc_p_shoulder(leg, position, orientation) + new_dif;
+              foot_position_sequence[i][leg] = p_shoulder + dif;
             } else {
-              // FIXME: find workaround in this case.
-              // std::cout << "Warning: floor not reachable!" << new_dif.norm() << std::endl;
+              // FIXME: find workaround in this case (floor not reachable).
             }
           }
         }
