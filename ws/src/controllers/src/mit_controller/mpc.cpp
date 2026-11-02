@@ -30,9 +30,6 @@ void MPC::GetB(double psi,
                Eigen::Ref<BMatrixT> B) {
   if (!update_linearization) {
     B.setZero();
-    for (unsigned int foot_indx = 0; foot_indx < NUM_FEET; foot_indx++) {
-      B.block<3, 3>(9, foot_indx * 3).diagonal().setConstant(dt / m);
-    }
   }
   Eigen::Matrix3d I_rot;
   MPC::GetIWorld(psi, inertia, I_rot);
@@ -40,8 +37,11 @@ void MPC::GetB(double psi,
   for (unsigned int foot_indx = 0; foot_indx < NUM_FEET; foot_indx++) {
     if (contacts[foot_indx]) {
       B.block<3, 3>(6, foot_indx * 3) = I_rot_inv * skew(r[foot_indx]) * dt;
+      B.block<3, 3>(9, foot_indx * 3).diagonal().setConstant(dt / m);
     } else {
+      // A swing foot transmits no force
       B.block<3, 3>(6, foot_indx * 3).setZero();
+      B.block<3, 3>(9, foot_indx * 3).diagonal().setZero();
     }
   }
 }
@@ -68,8 +68,10 @@ void MPC::GetIWorld(double psi, const Eigen::Ref<const Eigen::Matrix3d> &inertia
 
 void MPC::GetC(double mu, Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, INPUT_SIZE>> C) {
   for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
-    C.block<NUM_POLY_CONST_PER_FOOT, 3>(NUM_POLY_CONST_PER_FOOT * foot, 3 * foot) << 1, 0, -mu, 1, 0, mu, 0, 1, -mu, 0,
-        1, mu;
+    C.block<NUM_POLY_CONST_PER_FOOT, 3>(NUM_POLY_CONST_PER_FOOT * foot, 3 * foot) << 1, 0, -mu,  // |f_x| <= mu * f_z
+        -1, 0, -mu,                                                                             //
+        0, 1, -mu,                                                                              // |f_y| <= mu * f_z
+        0, -1, -mu;                                                                             //
   }
 }
 
@@ -82,15 +84,21 @@ void MPC::GetCbounds(double fmin,
   for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
     auto block_lb = c_lb.block<NUM_POLY_CONST_PER_FOOT, 1>(foot * NUM_POLY_CONST_PER_FOOT, 0);
     auto block_ub = c_ub.block<NUM_POLY_CONST_PER_FOOT, 1>(foot * NUM_POLY_CONST_PER_FOOT, 0);
-    block_lb(0, 0) = NEG_UNBOUND;
-    block_lb(1, 0) = 0;
-    block_lb(2, 0) = NEG_UNBOUND;
-    block_lb(3, 0) = 0;
+    block_lb.setConstant(NEG_UNBOUND);
+    block_ub.setConstant(0.0);
+  }
+}
 
-    block_ub(0, 0) = 0;
-    block_ub(1, 0) = POS_UNBOUND;
-    block_ub(2, 0) = 0;
-    block_ub(3, 0) = POS_UNBOUND;
+void MPC::GetCUpperMask(const std::array<bool, NUM_FEET> &contact,
+                        Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_ub_mask) {
+  for (unsigned int foot = 0; foot < NUM_FEET; foot++) {
+    auto block_ub_mask = c_ub_mask.block<NUM_POLY_CONST_PER_FOOT, 1>(foot * NUM_POLY_CONST_PER_FOOT, 0);
+    if (contact[foot]) {
+      block_ub_mask.setOnes();
+    } else {
+      // A swing foot transmits no force, its friction pyramid rows are removed from the QP
+      block_ub_mask.setZero();
+    }
   }
 }
 
@@ -217,6 +225,9 @@ MPC::MPC(double alpha,
   ocp_qp_dims_set(solver_config_, ocp_dims_, PREDICTION_HORIZON, "nbu", &zero);
   // create qp in based on the dimensions
   qp_in_ = ocp_qp_in_create(ocp_dims_);
+  // The friction pyramid rows are one-sided (D u <= 0): masking their lower side removes it from the QP
+  // instead of passing NEG_UNBOUND as a finite bound to the QP solver.
+  CBoundT c_lb_mask = CBoundT::Zero();
   // set the values that won't be changed
   for (int k = 0; k < PREDICTION_HORIZON; k++) {
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("D"), D_.data());
@@ -226,6 +237,7 @@ MPC::MPC(double alpha,
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lg"), Clb_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ug"), Cub_.data());
     ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("Jbu"), inputIdentity_.data());
+    ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lg_mask"), c_lb_mask.data());
   }
   ocp_qp_in_set(solver_config_, qp_in_, PREDICTION_HORIZON, const_cast<char *>("Q"), Q_.data());
   ocp_qp_in_set(solver_config_, qp_in_, 0, const_cast<char *>("Jbx"), stateIdentity_.data());
@@ -452,6 +464,10 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("B"), Bs_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("lbu"), ulbs_[k].data());
       ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ubu"), uubs_[k].data());
+      // remove the friction pyramid rows of swing feet from the QP
+      CBoundT c_ub_mask;
+      MPC::GetCUpperMask(gait_sequence_.contact_sequence[k], c_ub_mask);
+      ocp_qp_in_set(solver_config_, qp_in_, k, const_cast<char *>("ug_mask"), c_ub_mask.data());
     }  // State realted stuff is over full horizon
     // Target state and put into q vector
     Eigen::Matrix<double, STATE_SIZE, 1> target_state;

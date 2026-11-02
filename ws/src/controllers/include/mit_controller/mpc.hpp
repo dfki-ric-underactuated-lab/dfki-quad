@@ -112,6 +112,8 @@ class MPC : public MPCInterface {
                          double fmax,
                          Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_lb,
                          Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_ub);
+  static void GetCUpperMask(const std::array<bool, NUM_FEET> &contact,
+                            Eigen::Ref<Eigen::Matrix<double, NUM_POLY_CONST_PER_FOOT * NUM_FEET, 1>> c_ub_mask);
   static void GetUBounds(const std::array<bool, NUM_FEET> &contact,
                          double fmin,
                          double fmax,
