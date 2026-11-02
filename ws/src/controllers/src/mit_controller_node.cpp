@@ -89,7 +89,7 @@ MITController::MITController(const std::string &nodeName)
   this->declare_parameter<double>("mpc_clarabel_max_step_fraction", 0.99);
   // Declare the initial state constraint as an equality (nbxe), so acados eliminates x0 from the QP instead of
   // passing lbx == ubx as two inequalities. Applies to all QP solvers.
-  this->declare_parameter<bool>("mpc_x0_as_equality", false);
+  this->declare_parameter<bool>("mpc_x0_as_equality", true);
   // Flush subnormal floating-point numbers to zero while the QP solvers run (FTZ/DAZ on x86, FZ on ARM). Warm-started
   // first-order solvers accumulate them and x86 computes with them on a slow path.
   this->declare_parameter<bool>("mpc_flush_denormals", true);
