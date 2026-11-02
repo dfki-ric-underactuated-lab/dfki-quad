@@ -3,6 +3,7 @@
 #include <blasfeo.h>
 
 #include <iostream>
+#include <limits>
 
 #include "acados/ocp_qp/ocp_qp_full_condensing.h"
 #include "acados/utils/print.h"
@@ -593,6 +594,11 @@ void MPC::GetWrenchSequence(WrenchSequence &wrench_sequence,
 
   solver_information.success = (acados_return == ACADOS_SUCCESS);
   last_solve_succeeded_ = solver_information.success;
+  // only a successful solve reports these
+  solver_information.qp_objective_value = std::numeric_limits<double>::quiet_NaN();
+  for (double &residual : solver_information.qp_residuals) {
+    residual = std::numeric_limits<double>::quiet_NaN();
+  }
 
   if (acados_return == ACADOS_SUCCESS) {
     // Some solver (including OSQP) might not check for NaN's, to not overwrite the last solution lets test the first

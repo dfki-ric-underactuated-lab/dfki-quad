@@ -971,6 +971,7 @@ void MITController::MPCLoopCallback() {
     solve_time_message.acados_total_time = solver_info.total_solver_time;
     solve_time_message.acados_num_iter = solver_info.acados_num_iter;
     solve_time_message.acados_t_computed = solver_info.acados_t_computed;
+    solve_time_message.acados_return = solver_info.return_code;
     solve_time_message.qp_objective_value = solver_info.qp_objective_value;
     solve_time_message.qp_residuals[0] = solver_info.qp_residuals[0];
     solve_time_message.qp_residuals[1] = solver_info.qp_residuals[1];
