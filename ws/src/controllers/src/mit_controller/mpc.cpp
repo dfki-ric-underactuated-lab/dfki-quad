@@ -136,6 +136,7 @@ MPC::MPC(double alpha,
          int clarabel_iter_ref_max_iter,
          bool clarabel_equilibrate,
          double clarabel_max_step_fraction,
+         std::string proxqp_dense_backend,
          bool x0_as_equality,
          bool flush_denormals,
          bool scale_inputs)
@@ -313,6 +314,20 @@ MPC::MPC(double alpha,
                                  "clarabel_max_step_fraction",
                                  &clarabel_max_step_fraction);
   }
+#ifdef ACADOS_WITH_PROXQP
+  if (solver == FULL_CONDENSING_PROXQP) {
+    // the sparse interface (partial condensing) has a single factorization, so only the dense one takes a backend
+    assert(proxqp_dense_backend == "AUTOMATIC" or proxqp_dense_backend == "PRIMAL_DUAL_LDLT"
+           or proxqp_dense_backend == "PRIMAL_LDLT");
+    std::cout << "Set proxqp dense backend to " << proxqp_dense_backend.c_str() << std::endl;
+    ocp_qp_xcond_solver_opts_set(solver_config_,
+                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                 "proxqp_dense_backend",
+                                 (void *)proxqp_dense_backend.c_str());
+  }
+#else
+  (void)proxqp_dense_backend;
+#endif
   if (solver == PARTIAL_CONDENSING_OSQP) {
     std::cout << "Set osqp linear system solver to " << osqp_linsys_solver.c_str() << std::endl;
     ocp_qp_xcond_solver_opts_set(solver_config_,

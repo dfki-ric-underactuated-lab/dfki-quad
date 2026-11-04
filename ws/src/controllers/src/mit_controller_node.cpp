@@ -89,6 +89,10 @@ MITController::MITController(const std::string &nodeName)
   this->declare_parameter<bool>("mpc_clarabel_equilibrate", true);
   // Clarabel: maximum interior point step length fraction
   this->declare_parameter<double>("mpc_clarabel_max_step_fraction", 0.99);
+  // ProxQP: factorization of the dense backend (FULL_CONDENSING_PROXQP only): AUTOMATIC | PRIMAL_DUAL_LDLT |
+  // PRIMAL_LDLT. PRIMAL_DUAL_LDLT factorizes the primal-dual KKT system, PRIMAL_LDLT the primal system with the
+  // constraints added as rank updates; AUTOMATIC lets ProxQP pick from the problem dimensions.
+  this->declare_parameter<std::string>("mpc_proxqp_dense_backend", "AUTOMATIC");
   // Declare the initial state constraint as an equality (nbxe), so acados eliminates x0 from the QP instead of
   // passing lbx == ubx as two inequalities. Applies to all QP solvers.
   this->declare_parameter<bool>("mpc_x0_as_equality", true);
@@ -621,6 +625,7 @@ MITController::MITController(const std::string &nodeName)
                                this->get_parameter("mpc_clarabel_iter_ref_max_iter").as_int(),
                                this->get_parameter("mpc_clarabel_equilibrate").as_bool(),
                                this->get_parameter("mpc_clarabel_max_step_fraction").as_double(),
+                               this->get_parameter("mpc_proxqp_dense_backend").as_string(),
                                this->get_parameter("mpc_x0_as_equality").as_bool(),
                                this->get_parameter("mpc_flush_denormals").as_bool(),
                                this->get_parameter("mpc_scale_inputs").as_bool());

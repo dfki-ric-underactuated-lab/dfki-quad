@@ -145,6 +145,7 @@ class MPC : public MPCInterface {
       int clarabel_iter_ref_max_iter,
       bool clarabel_equilibrate,
       double clarabel_max_step_fraction,
+      std::string proxqp_dense_backend,
       bool x0_as_equality,
       bool flush_denormals,
       bool scale_inputs
