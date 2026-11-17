@@ -286,12 +286,18 @@ MPC::MPC(double alpha,
                                  (void *)hpipm_mode.c_str());
   }
   if (solver == PARTIAL_CONDENSING_CLARABEL) {
-    assert(clarabel_mode == "REDUCED_ACCURACY" or clarabel_mode == "FULL_ACCURACY");
-    std::cout << "Set clarabel mode to " << clarabel_mode.c_str() << std::endl;
-    ocp_qp_xcond_solver_opts_set(solver_config_,
-                                 reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
-                                 "clarabel_mode",
-                                 (void *)clarabel_mode.c_str());
+    assert(clarabel_mode == "NONE" or clarabel_mode == "REDUCED_ACCURACY" or clarabel_mode == "FULL_ACCURACY");
+    // NONE sets no preset: Clarabel keeps its default tolerances, overridden by solver_tolerances (if > 0). A preset
+    // has priority over solver_tolerances.
+    if (clarabel_mode == "NONE") {
+      std::cout << "Set no clarabel mode" << std::endl;
+    } else {
+      std::cout << "Set clarabel mode to " << clarabel_mode.c_str() << std::endl;
+      ocp_qp_xcond_solver_opts_set(solver_config_,
+                                   reinterpret_cast<ocp_qp_xcond_solver_opts *>(solver_opts_),
+                                   "clarabel_mode",
+                                   (void *)clarabel_mode.c_str());
+    }
     // Constraint sides at +-POS_UNBOUND are dropped instead of being passed as rows. The threshold is below
     // POS_UNBOUND so that bounds shifted by partial condensing still count as unbounded.
     double inf_bound = 0.1 * POS_UNBOUND;

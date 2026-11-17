@@ -50,7 +50,7 @@ int main() {
           0,
           -1,
           "direct",
-          "REDUCED_ACCURACY",
+          "NONE",
           10,
           true,
           0.99,

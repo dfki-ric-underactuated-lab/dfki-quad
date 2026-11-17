@@ -81,9 +81,9 @@ MITController::MITController(const std::string &nodeName)
   this->declare_parameter<int>("mpc_warm_start", 1);
   this->declare_parameter<double>("mpc_solver_tolerances", -1.0);
   this->declare_parameter<std::string>("mpc_osqp_linsys_solver", "direct");  // direct | indirect
-  // Clarabel accuracy preset: REDUCED_ACCURACY | FULL_ACCURACY. mpc_solver_tolerances (if > 0) override its
-  // feasibility and gap tolerances.
-  this->declare_parameter<std::string>("mpc_clarabel_mode", "REDUCED_ACCURACY");
+  // Clarabel accuracy preset: NONE | REDUCED_ACCURACY | FULL_ACCURACY. NONE sets no preset, so Clarabel keeps its
+  // default tolerances, overridden by mpc_solver_tolerances (if > 0). A preset has priority over mpc_solver_tolerances.
+  this->declare_parameter<std::string>("mpc_clarabel_mode", "NONE");
   // Clarabel: maximum iterative refinement steps per linear solve (0 disables refinement)
   this->declare_parameter<int>("mpc_clarabel_iter_ref_max_iter", 10);
   this->declare_parameter<bool>("mpc_clarabel_equilibrate", true);
